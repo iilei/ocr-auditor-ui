@@ -1,5 +1,5 @@
 import React from 'react';
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 
 import SplitView from './SplitView';
@@ -55,7 +55,10 @@ const GlobalStyle = createGlobalStyle`
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100%;
+
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
   }
   
   #root {    
@@ -68,6 +71,11 @@ const GlobalStyle = createGlobalStyle`
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
   }
 `;
+
+const StyledSplitView = styled(SplitView)`
+  display: flex;
+  flex: 1;
+`
 
 const App: React.FC = () => {
   return (

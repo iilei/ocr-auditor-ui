@@ -2,7 +2,6 @@ import React, { createRef, Component, SyntheticEvent, PropsWithoutRef } from 're
 import { RouteComponentProps } from 'react-router';
 import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
 
-import styled from 'styled-components';
 import { throttle } from 'lodash';
 import { render } from 'react-dom';
 import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
@@ -23,13 +22,23 @@ interface Cancelable {
   cancel(): void;
 }
 
-const StyledStage = styled(Stage)`
-  & canvas {
-    height: 100% !important;
-    width: 100% !important;
-    object-fit: contain;
-  }
-`;
+// const StyledStage = styled(Stage)`
+//   flex: 1;
+//   width: auto;
+//   height: 100vh;
+//   & .konvajs-content {
+//     flex: 1;
+//     width: auto !important;
+//     height: 100vh !important;
+//   }
+//   & canvas {
+//     display: flex;
+//     flex: 1;
+//     object-fit: contain;
+//     width: auto !important;
+//     height: 100vh !important;
+//   }
+// `;
 
 class HocrView extends Component<PropsType> {
   private stageRef = createRef<Stage>();
@@ -81,7 +90,7 @@ class HocrView extends Component<PropsType> {
 
   render() {
     const { width, height } = this.state;
-    return <StyledStage ref={this.stageRef} width={width} height={height} />;
+    return <Stage ref={this.stageRef} width={width} height={height} />;
   }
 }
 
