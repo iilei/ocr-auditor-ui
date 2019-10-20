@@ -8,11 +8,12 @@ import Konva from 'konva';
 import { render } from 'react-dom';
 import { Stage, Layer, Star, Text } from 'react-konva';
 
-import docLoader from './modules/docLoader';
+import DocLoader from './modules/docLoader';
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
   id: string;
+  page: string;
 };
 
 // component own properties
@@ -40,12 +41,14 @@ class HocrView extends Component<PropsType> {
   constructor(props: PropsType) {
     super(props);
 
-    const { id } = props.match.params;
+    const { id, page = '1' } = props.match.params;
     // const { realm } = xyz; // TODO obtain realm from credentials
 
-    const doc = docLoader(`/${id}.json`).then(
+    const loader = new DocLoader(`/${id}.json`, page);
+
+    const doc = loader.get().then(
       result => {
-        console.log(result);
+        console.log(result, page);
         debugger;
       },
       error => {},
