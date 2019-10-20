@@ -1,8 +1,47 @@
 import React from 'react';
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 import SplitView from './SplitView';
 import Toolbar from './Toolbar';
+
+const customConf = {
+  mediaQuery: 'only screen',
+  columns: {
+    xs: 4,
+    sm: 8,
+    md: 8,
+    lg: 12,
+    xl: 12,
+  },
+  gutterWidth: {
+    xs: 1,
+    sm: 1,
+    md: 1.5,
+    lg: 1.5,
+    xl: 1.5,
+  },
+  paddingWidth: {
+    xs: 1,
+    sm: 1,
+    md: 1.5,
+    lg: 1.5,
+    xl: 1.5,
+  },
+  container: {
+    xs: 'full', // 'full' = max-width: 100%
+    sm: 'full', // 'full' = max-width: 100%
+    md: 'full', // 'full' = max-width: 100%
+    lg: 'full', // max-width: 1440px
+    xl: 'full', // max-width: 1440px
+  },
+  breakpoints: {
+    xs: 1,
+    sm: 48, // 768px
+    md: 64, // 1024px
+    lg: 90, // 1440px
+    xl: 120, // 1920px
+  },
+};
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -31,11 +70,13 @@ const GlobalStyle = createGlobalStyle`
 
 const App: React.FC = () => {
   return (
-    <React.Fragment>
-      <GlobalStyle />
-      <Toolbar />
-      <SplitView />
-    </React.Fragment>
+    <ThemeProvider theme={{ awesomegrid: customConf }}>
+      <React.Fragment>
+        <GlobalStyle />
+        <SplitView />
+        <Toolbar />
+      </React.Fragment>
+    </ThemeProvider>
   );
 };
 

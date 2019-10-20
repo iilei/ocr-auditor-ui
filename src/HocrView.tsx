@@ -1,6 +1,9 @@
-import React, { createRef, Component } from 'react';
+import React, { createRef, Component, SyntheticEvent } from 'react';
 import styled from 'styled-components';
 import { throttle } from 'lodash';
+import Konva from 'konva';
+import { render } from 'react-dom';
+import { Stage, Layer, Star, Text } from 'react-konva';
 
 interface Cancelable {
   cancel(): void;
@@ -8,6 +11,7 @@ interface Cancelable {
 
 const Img = styled.img`
   object-fit: contain;
+  background-color: #03a9f4;
 `;
 
 class HocrView extends Component {
@@ -16,44 +20,43 @@ class HocrView extends Component {
   state = {
     width: 0,
     height: 0,
+    naturalHeight: 0,
+    naturalWidth: 0,
   };
 
   updateDimensionsThrottled: any;
 
-  //
-  // constructor (props: React.ComponentProps<any>) {
-  //   super(props);
-  //
-  // }
   componentDidMount() {
-    this.updateDimensions();
-
-    // React.Dispatch<any>
-
     this.updateDimensionsThrottled = throttle(this.updateDimensions, 333, { trailing: true, leading: false });
 
-    window.addEventListener('resize', this.updateDimensions);
+    window.addEventListener('resize', this.updateDimensionsThrottled);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateDimensions);
+    window.removeEventListener('resize', this.updateDimensionsThrottled);
     this.updateDimensionsThrottled.cancel();
   }
 
   // throttle?
-  updateDimensions = (): Cancelable | void => {
-    // TODO use // $0.getBoundingClientRect() on resize
-    if (this.imgRef.current) {
-      const { height, width, bottom, left, right, top } = this.imgRef.current.getBoundingClientRect();
-      this.setState({ height, width, bottom, left, right, top });
-      console.log(this.state, this.imgRef);
+  updateDimensions = (event?: SyntheticEvent): Cancelable | void => {
+    const { current: imgRef } = this.imgRef;
+    if (imgRef && imgRef.complete && event) {
+      const { height, width, bottom, left, right, top } = imgRef.getBoundingClientRect();
+      const { naturalHeight, naturalWidth } = imgRef;
+
+      const payload = { height, width, bottom, left, right, top, naturalHeight, naturalWidth };
+
+      this.setState(payload);
     }
   };
 
   render() {
+    const { width, height, naturalHeight, naturalWidth } = this.state;
+
     return (
       <React.Fragment>
-        <Img src="./phototest.gif" ref={this.imgRef} />
+        <Img src="./phototest.gif" ref={this.imgRef} onLoad={this.updateDimensions} />
+        <Stage width={width} height={height} style={{ marginTop: this.state.height * -1 }} />
       </React.Fragment>
     );
   }

@@ -14,10 +14,10 @@ const SplitView: React.FC = () => {
   return (
     <Container>
       <Row>
-        <Col xs={4} sm={4}>
+        <Col md={6}>
           <HocrView />
         </Col>
-        <Col xs={4} sm={4}>
+        <Col md={2}>
           <Actor />
         </Col>
       </Row>

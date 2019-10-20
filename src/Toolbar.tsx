@@ -1,12 +1,16 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const Footer = styled.footer`
-  flex-shrink: 0;
-`;
+import { Container, Row, Col } from 'react-awesome-styled-grid';
 
 const Toolbar: React.FC = () => {
-  return <Footer>Toolbar</Footer>;
+  return (
+    <footer>
+      <Container>
+        <Row>
+          <Col md={8}>Footer</Col>
+        </Row>
+      </Container>
+    </footer>
+  );
 };
 
 export default Toolbar;
