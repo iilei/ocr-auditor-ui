@@ -1,9 +1,22 @@
-import React, { createRef, Component, SyntheticEvent } from 'react';
+import React, { createRef, Component, SyntheticEvent, PropsWithoutRef } from 'react';
+import { RouteComponentProps } from 'react-router';
+import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
+
 import styled from 'styled-components';
 import { throttle } from 'lodash';
 import Konva from 'konva';
 import { render } from 'react-dom';
 import { Stage, Layer, Star, Text } from 'react-konva';
+
+import docLoader from './modules/docLoader';
+
+// Type whatever you expect in 'this.props.match.params.*'
+type PathParamsType = {
+  id: string;
+};
+
+// component own properties
+type PropsType = RouteComponentProps<PathParamsType>;
 
 interface Cancelable {
   cancel(): void;
@@ -14,17 +27,30 @@ const Img = styled.img`
   background-color: #03a9f4;
 `;
 
-class HocrView extends Component {
+class HocrView extends Component<PropsType> {
   private imgRef = createRef<HTMLImageElement>();
-
   state = {
     width: 0,
     height: 0,
     naturalHeight: 0,
     naturalWidth: 0,
   };
-
   updateDimensionsThrottled: any;
+
+  constructor(props: PropsType) {
+    super(props);
+
+    const { id } = props.match.params;
+    // const { realm } = xyz; // TODO obtain realm from credentials
+
+    const doc = docLoader(`/${id}.json`).then(
+      result => {
+        console.log(result);
+        debugger;
+      },
+      error => {},
+    );
+  }
 
   componentDidMount() {
     this.updateDimensionsThrottled = throttle(this.updateDimensions, 333, { trailing: true, leading: false });
@@ -51,15 +77,12 @@ class HocrView extends Component {
   };
 
   render() {
-    const { width, height, naturalHeight, naturalWidth } = this.state;
-
     return (
       <React.Fragment>
-        <Img src="./phototest.gif" ref={this.imgRef} onLoad={this.updateDimensions} />
-        <Stage width={width} height={height} style={{ marginTop: this.state.height * -1 }} />
+        <Stage />
       </React.Fragment>
     );
   }
 }
 
-export default HocrView;
+export default withRouter(HocrView);

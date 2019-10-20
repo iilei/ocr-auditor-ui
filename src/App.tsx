@@ -1,5 +1,6 @@
 import React from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 
 import SplitView from './SplitView';
 import Toolbar from './Toolbar';
@@ -70,13 +71,22 @@ const GlobalStyle = createGlobalStyle`
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={{ awesomegrid: customConf }}>
-      <React.Fragment>
-        <GlobalStyle />
-        <SplitView />
-        <Toolbar />
-      </React.Fragment>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider theme={{ awesomegrid: customConf }}>
+        <React.Fragment>
+          <Route exact path="/">
+            <Redirect to="/doc/phototest/1" />
+          </Route>
+          <Route path="/doc/:id/:page?">
+            <React.Fragment>
+              <GlobalStyle />
+              <SplitView />
+              <Toolbar />
+            </React.Fragment>
+          </Route>
+        </React.Fragment>
+      </ThemeProvider>
+    </Router>
   );
 };
 
