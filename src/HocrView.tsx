@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-
 
 import styled from 'styled-components';
 import { throttle } from 'lodash';
-import Konva from 'konva';
 import { render } from 'react-dom';
-import { Stage, Layer, Star, Text } from 'react-konva';
+import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 
-import DocLoader from './modules/docLoader';
+import { DocLoader, DocView } from './modules';
+import { ImgMeta } from './modules/docView';
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
@@ -23,18 +23,21 @@ interface Cancelable {
   cancel(): void;
 }
 
-const Img = styled.img`
-  object-fit: contain;
-  background-color: #03a9f4;
+const StyledStage = styled(Stage)`
+  & canvas {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: contain;
+  }
 `;
 
 class HocrView extends Component<PropsType> {
-  private imgRef = createRef<HTMLImageElement>();
+  private stageRef = createRef<Stage>();
+  private docLoader: DocLoader;
+
   state = {
     width: 0,
     height: 0,
-    naturalHeight: 0,
-    naturalWidth: 0,
   };
   updateDimensionsThrottled: any;
 
@@ -44,21 +47,25 @@ class HocrView extends Component<PropsType> {
     const { id, page = '1' } = props.match.params;
     // const { realm } = xyz; // TODO obtain realm from credentials
 
-    const loader = new DocLoader(`/${id}.json`, page);
-
-    const doc = loader.get().then(
-      result => {
-        console.log(result, page);
-        debugger;
-      },
-      error => {},
-    );
+    this.docLoader = new DocLoader(`/${id}.json`, page);
+    this.stageRef = { current: null };
   }
 
   componentDidMount() {
     this.updateDimensionsThrottled = throttle(this.updateDimensions, 333, { trailing: true, leading: false });
-
     window.addEventListener('resize', this.updateDimensionsThrottled);
+
+    if (this.stageRef.current) {
+      const doc = this.docLoader.get().then(
+        view => {
+          const docView = new DocView(this.stageRef, this.docLoader);
+          docView.loadImage(({ width, height }: ImgMeta) => {
+            this.setState({ width, height });
+          });
+        },
+        error => {},
+      );
+    }
   }
 
   componentWillUnmount() {
@@ -66,25 +73,15 @@ class HocrView extends Component<PropsType> {
     this.updateDimensionsThrottled.cancel();
   }
 
-  // throttle?
   updateDimensions = (event?: SyntheticEvent): Cancelable | void => {
-    const { current: imgRef } = this.imgRef;
-    if (imgRef && imgRef.complete && event) {
-      const { height, width, bottom, left, right, top } = imgRef.getBoundingClientRect();
-      const { naturalHeight, naturalWidth } = imgRef;
-
-      const payload = { height, width, bottom, left, right, top, naturalHeight, naturalWidth };
-
-      this.setState(payload);
+    const { current: stageRef } = this.stageRef;
+    if (stageRef && event) {
     }
   };
 
   render() {
-    return (
-      <React.Fragment>
-        <Stage />
-      </React.Fragment>
-    );
+    const { width, height } = this.state;
+    return <StyledStage ref={this.stageRef} width={width} height={height} />;
   }
 }
 

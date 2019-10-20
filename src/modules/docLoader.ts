@@ -1,14 +1,15 @@
 import superagent from 'superagent';
 
-const MATCH_NON_NUMBER = /\D/;
+const DIGITS_ONLY = /^\d+$/;
 
-const equivToInt = (str: string): boolean => !MATCH_NON_NUMBER.test(str);
+const isStrictlyInt = (str: string): boolean => DIGITS_ONLY.test(str);
 
 class DocLoader {
   _doc: string;
   _document: Record<string, any> & { pages: Array<Record<string, any>> };
   _page: string;
   _ready: boolean;
+  _record: Record<string, any>;
   _view: Record<string, any>;
 
   constructor(doc: string, page: string) {
@@ -16,6 +17,7 @@ class DocLoader {
     this._document = { pages: [] };
     this._page = page;
     this._ready = false;
+    this._record = {};
     this._view = {};
 
     return this;
@@ -29,8 +31,9 @@ class DocLoader {
         if (!res.body || !res.body.pages) {
           return Error('Unexpected Schema');
         }
-        const pageAccessor = equivToInt(page) ? 'ppageno' : 'id';
-        const pageIdentifier = equivToInt(page) ? parseInt(page, 10) - 1 : page;
+        this._record = res.body;
+        const pageAccessor = isStrictlyInt(page) ? 'ppageno' : 'id';
+        const pageIdentifier = isStrictlyInt(page) ? parseInt(page, 10) - 1 : page;
 
         this._view = res.body.pages.find((page: Record<string, any>) => page[pageAccessor] === pageIdentifier);
 
@@ -42,6 +45,10 @@ class DocLoader {
         throw Error(err);
       });
   };
+
+  get record() {
+    return this._record;
+  }
 
   get doc() {
     return this._doc;
