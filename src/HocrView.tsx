@@ -68,8 +68,8 @@ class HocrView extends Component<PropsType> {
       const doc = this.docLoader.get().then(
         view => {
           const docView = new DocView(this.stageRef, this.docLoader);
-          docView.loadImage(({ width, height }: ImgMeta) => {
-            this.setState({ width, height });
+          docView.init(({ width, height }: ImgMeta) => {
+            this.setState({ width, height }, docView.walkThrough);
           });
         },
         error => {},

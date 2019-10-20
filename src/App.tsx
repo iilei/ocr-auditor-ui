@@ -75,7 +75,7 @@ const GlobalStyle = createGlobalStyle`
 const StyledSplitView = styled(SplitView)`
   display: flex;
   flex: 1;
-`
+`;
 
 const App: React.FC = () => {
   return (
