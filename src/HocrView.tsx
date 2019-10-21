@@ -8,6 +8,7 @@ import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 
 import { DocLoader, DocView } from './modules';
 import { ImgMeta } from './modules/docView';
+import { KonvaEventObject } from 'konva/types/Node';
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
@@ -47,6 +48,7 @@ class HocrView extends Component<PropsType> {
   state = {
     width: 0,
     height: 0,
+    assumeSecondClick: true,
   };
   updateDimensionsThrottled: any;
 
@@ -88,9 +90,36 @@ class HocrView extends Component<PropsType> {
     }
   };
 
+  clickHandler = (event: KonvaEventObject<MouseEvent>) => {
+
+    // TODO bind to keyboard shortcuts; tab through, pageDown to select next paragraph?
+    const possiblyDoubleClick = setTimeout(() => {
+      if (event.evt.detail === 1 && this.state.assumeSecondClick) {
+        this.handleSingleClick(event);
+      }
+      this.setState({ assumeSecondClick: true });
+    }, 330);
+    // it was a double click
+    if (event.evt.detail === 2) {
+      window.clearTimeout(possiblyDoubleClick);
+      this.setState({ assumeSecondClick: false });
+      this.handleDoubleClick(event);
+    }
+  };
+
+  handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
+    const scopeId = event.target.getParent().getId();
+    console.log(`${scopeId} clicked`);
+  };
+
+  handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
+    const scopeId = event.target.getParent().getId();
+    console.log(`${scopeId} double clicked`);
+  };
+
   render() {
     const { width, height } = this.state;
-    return <Stage ref={this.stageRef} width={width} height={height} />;
+    return <Stage ref={this.stageRef} width={width} height={height} onClick={this.clickHandler} />;
   }
 }
 

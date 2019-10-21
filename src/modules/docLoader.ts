@@ -34,9 +34,16 @@ class DocLoader {
         this._record = res.body;
         const pageAccessor = isStrictlyInt(page) ? 'ppageno' : 'id';
         const pageIdentifier = isStrictlyInt(page) ? parseInt(page, 10) - 1 : page;
+        const { contentType, ocrCapabilities, ocrSystem } = res.body;
 
-        this._view = res.body.pages.find((page: Record<string, any>) => page[pageAccessor] === pageIdentifier);
-
+        const pageDoc = res.body.pages.find((page: Record<string, any>) => page[pageAccessor] === pageIdentifier);
+        const view = {
+          contentType,
+          ocrCapabilities,
+          ocrSystem,
+          ...pageDoc,
+        };
+        this._view = view;
         this._ready = true;
 
         return this._view;
