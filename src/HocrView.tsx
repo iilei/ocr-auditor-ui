@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-
 
 import { throttle } from 'lodash';
 import { render } from 'react-dom';
-import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
-
+import { Stage, StageProps } from 'react-konva';
 import { DocLoader, DocView } from './modules';
 import { ImgMeta } from './modules/docView';
 import { KonvaEventObject } from 'konva/types/Node';
+import Konva from 'konva';
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
@@ -66,10 +66,12 @@ class HocrView extends Component<PropsType> {
     this.updateDimensionsThrottled = throttle(this.updateDimensions, 333, { trailing: true, leading: false });
     window.addEventListener('resize', this.updateDimensionsThrottled);
 
-    if (this.stageRef.current) {
+    const node = this.stageRef.current;
+
+    if (node) {
       const doc = this.docLoader.get().then(
         view => {
-          const docView = new DocView(this.stageRef, this.docLoader);
+          const docView = new DocView(node.getStage(), this.docLoader);
           docView.init(({ width, height }: ImgMeta) => {
             this.setState({ width, height }, docView.walkThrough);
           });
@@ -91,7 +93,6 @@ class HocrView extends Component<PropsType> {
   };
 
   clickHandler = (event: KonvaEventObject<MouseEvent>) => {
-
     // TODO bind to keyboard shortcuts; tab through, pageDown to select next paragraph?
     const possiblyDoubleClick = setTimeout(() => {
       if (event.evt.detail === 1 && this.state.assumeSecondClick) {
@@ -110,11 +111,13 @@ class HocrView extends Component<PropsType> {
   handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} clicked`);
+    // console.log(event.target.getParent().attrs.name)
   };
 
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} double clicked`);
+    // console.log(event.target.getParent().attrs.name)
   };
 
   render() {

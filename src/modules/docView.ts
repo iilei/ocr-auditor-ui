@@ -1,9 +1,10 @@
 import Konva from 'konva';
-import { RefObject } from 'react';
 import DocLoader from './docLoader';
-import { Stage } from 'react-konva';
 
 import { traverseFactory, bboxToKonvaRect } from '../modules';
+import { Group } from 'konva/types/Group';
+import { ShapeConfig } from 'konva/types/Shape';
+import { KonvaNodeComponent } from 'react-konva';
 
 // TODO how to get this dry?
 const scopeKeys = ['careas', 'pars', 'lines', 'words'];
@@ -12,6 +13,7 @@ type ScopeKeys = 'careas' | 'pars' | 'lines' | 'words';
 type Scope = {
   id: string;
   lang?: string;
+  content?: string;
 };
 
 type DocMeta = {
@@ -32,10 +34,10 @@ type BoxPaint = {
 };
 
 type ScopePaint = {
-  bbox?: Konva.RectConfig | Array<number>;
+  bbox?: ShapeConfig;
 };
 
-const groups: Record<string, Omit<ScopeBranch, 'id'> & ScopePaint> = {
+const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   careas: {
     bbox: {
       stroke: 'orange',
@@ -72,14 +74,14 @@ export type ImgMeta = {
 class DocView {
   _view: Record<string, any>;
   _image: ImgMeta;
-  _stage: Stage;
+  _stage: Konva.Stage;
   _groups: Record<string, Konva.Group>;
   _layers: Record<string, Konva.Layer>;
 
-  constructor(stageNode: RefObject<any>, doc: DocLoader) {
+  constructor(stageNode: Konva.Stage, doc: DocLoader) {
     const { view } = doc;
     this._view = view;
-    this._stage = stageNode.current;
+    this._stage = stageNode;
     this._layers = {};
     this._groups = {};
     this._image = {
@@ -101,36 +103,33 @@ class DocView {
   walkThrough = () => {
     const layer = new Konva.Layer();
     layer.add(new Konva.Group({ id: this._view.id }));
-    // @ts-ignore
+
     this._stage.add(layer);
+
+    this._stage.getStage();
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
       const operation = (view: ScopeBranch, [key, val]: [string, Array<ScopeBranch & ScopePaint>]) => {
-        const groupConfig = groups[key] || {};
-        // @ts-ignore
-        if (!layer.find(`#${view.id}`).length) {
-          layer.add(new Konva.Group({ id: view.id }));
-        }
-
-        // @ts-ignore
-        const parent = this._stage.find(`#${view.id}`);
+        const parent: Group = this._stage.findOne(`#${view.id}`);
 
         val.forEach(scope => {
-          const group = new Konva.Group({ id: scope.id });
+          const group = new Konva.Group({ id: scope.id, name: scope.content });
           Object.entries(scope).forEach(([prop, opts]: [string, any]) => {
-            // @ts-ignore
-            if (typeof groupConfig[prop] === 'object') {
-              const options = {
-                // @ts-ignore
-                ...groupConfig[prop],
-                ...bboxToKonvaRect(scope.bbox),
-              };
-              const box = new Konva.Rect(options);
-              group.add(box);
+            if (groups[key] && prop === 'bbox') {
+              const potentialConfig = groups[key][prop];
+              if (typeof potentialConfig === 'object') {
+                const options: ShapeConfig = {
+                  ...bboxToKonvaRect(scope.bbox),
+                  ...potentialConfig,
+                };
+                const box = new Konva.Rect(options);
+                group.add(box);
+              }
             }
           });
           // To get dimensions of paragraphs, use group.getClientRect()
+
           parent.add(group);
         });
       };
@@ -139,9 +138,6 @@ class DocView {
     });
 
     layer.draw();
-
-    // @ts-ignore
-    window.hocView = { ctx: this, layer };
   };
 
   private loadImage = (callback: Function) => {
@@ -165,7 +161,6 @@ class DocView {
 
       layer.add(img);
       layer.batchDraw();
-      // @ts-ignore
       this._stage.add(layer);
       this._layers.image = layer;
 
