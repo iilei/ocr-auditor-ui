@@ -77,6 +77,7 @@ class DocView {
   _stage: Konva.Stage;
   _groups: Record<string, Konva.Group>;
   _layers: Record<string, Konva.Layer>;
+  _ready: boolean;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
     const { view } = doc;
@@ -84,6 +85,7 @@ class DocView {
     this._stage = stageNode;
     this._layers = {};
     this._groups = {};
+    this._ready = false;
     this._image = {
       height: 0,
       width: 0,
@@ -98,6 +100,10 @@ class DocView {
     this._groups = {};
 
     this.loadImage(callback);
+  };
+
+  onExternalReady = () => {
+    // indicate the stage is ready
   };
 
   walkThrough = () => {
@@ -164,8 +170,7 @@ class DocView {
       this._stage.add(layer);
       this._layers.image = layer;
 
-      // TODO activate
-      // this.walkThrough();
+      this.walkThrough();
       callback(this._image);
     };
     imageObj.src = image;
@@ -173,6 +178,13 @@ class DocView {
 
   get image() {
     return this._image;
+  }
+
+  set ready(isReady: boolean | number | undefined | null) {
+    this._ready = Boolean(isReady);
+    if (isReady) {
+      this.onExternalReady();
+    }
   }
 }
 
