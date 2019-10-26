@@ -40,28 +40,39 @@ type ScopePaint = {
 const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   careas: {
     bbox: {
-      stroke: 'orange',
+      stroke: 'rgba(255, 152, 0, .7)',
       strokeWidth: 1,
-      opacity: 0.3,
+      opacity: 0,
+      lineJoin: 'round',
+      cornerRadius: 2,
     },
   },
   pars: {
     bbox: {
-      stroke: 'turquoise',
+      stroke: 'rgba(0, 188, 212, .7)',
       strokeWidth: 1,
-      opacity: 0.4,
+      opacity: 0,
+      lineJoin: 'round',
+      cornerRadius: 2,
     },
   },
   lines: {
     bbox: {
-      fill: 'magenta',
-      opacity: 0.15,
+      stroke: 'rgba(0, 188, 212, .7)',
+      strokeWidth: 1,
+      opacity: 0,
+      lineJoin: 'round',
+      cornerRadius: 2,
     },
   },
   words: {
     bbox: {
-      stroke: 'turquoise',
-      strokeWidth: 1,
+      stroke: 'rgba(0, 188, 212, .7)',
+      strokeWidth: 4,
+      opacity: 0,
+      lineJoin: 'round',
+      cornerRadius: 2,
+      hitStrokeWidth: 16,
     },
   },
 };
@@ -71,33 +82,37 @@ export type ImgMeta = {
   height: number;
 };
 
+const blankNode = new Konva.Rect({ visible: false });
+
 class DocView {
   _view: Record<string, any>;
   _image: ImgMeta;
   _stage: Konva.Stage;
-  _groups: Record<string, Konva.Group>;
-  _layers: Record<string, Konva.Layer>;
+  _layers: Record<'root' | 'image', Konva.Layer>;
+  _node: Konva.Node;
   _ready: boolean;
+  _delay: number;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
+    const blank = new Konva.Layer();
+
     const { view } = doc;
     this._view = view;
     this._stage = stageNode;
-    this._layers = {};
-    this._groups = {};
+    this._layers = { root: blank, image: blank };
+    this._node = blankNode;
     this._ready = false;
+    this._delay = 75;
     this._image = {
       height: 0,
       width: 0,
     };
+
     return this;
   }
 
   init = (callback: Function) => {
-    Object.keys(this._layers).forEach(key => {
-      this._layers[key].clear();
-    });
-    this._groups = {};
+    this._layers.root.clear();
 
     this.loadImage(callback);
   };
@@ -107,12 +122,11 @@ class DocView {
   };
 
   walkThrough = () => {
-    const layer = new Konva.Layer();
-    layer.add(new Konva.Group({ id: this._view.id }));
+    this._layers.root = new Konva.Layer();
+    this._layers.root.add(new Konva.Group({ id: this._view.id }));
+    this._stage.add(this._layers.root);
 
-    this._stage.add(layer);
-
-    this._stage.getStage();
+    var timeout = setTimeout(() => {}, this._delay);
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
@@ -130,6 +144,20 @@ class DocView {
                   ...potentialConfig,
                 };
                 const box = new Konva.Rect(options);
+                box.on('mouseover', evt => {
+                  this._node = box;
+                  timeout = setTimeout(() => {
+                    evt.target.opacity(1);
+                    this._layers.root.draw();
+                  }, this._delay);
+                });
+                box.on('mouseout', evt => {
+                  clearTimeout(timeout);
+                  this._node = blankNode;
+                  evt.target.opacity(0);
+                  this._layers.root.draw();
+                });
+
                 group.add(box);
               }
             }
@@ -143,7 +171,7 @@ class DocView {
       traverseFactory(this._view, operation, key);
     });
 
-    layer.draw();
+    this._layers.root.draw();
   };
 
   private loadImage = (callback: Function) => {

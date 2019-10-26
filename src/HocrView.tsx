@@ -23,24 +23,6 @@ interface Cancelable {
   cancel(): void;
 }
 
-// const StyledStage = styled(Stage)`
-//   flex: 1;
-//   width: auto;
-//   height: 100vh;
-//   & .konvajs-content {
-//     flex: 1;
-//     width: auto !important;
-//     height: 100vh !important;
-//   }
-//   & canvas {
-//     display: flex;
-//     flex: 1;
-//     object-fit: contain;
-//     width: auto !important;
-//     height: 100vh !important;
-//   }
-// `;
-
 class HocrView extends Component<PropsType> {
   private stageRef = createRef<Stage>();
   private docLoader: DocLoader;
@@ -111,13 +93,13 @@ class HocrView extends Component<PropsType> {
   handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} clicked`);
-    // console.log(event.target.getParent().attrs.name)
+    console.log(event.target.getParent().attrs.name);
   };
 
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} double clicked`);
-    // console.log(event.target.getParent().attrs.name)
+    console.log(event.target.getParent().attrs.name);
   };
 
   render() {
