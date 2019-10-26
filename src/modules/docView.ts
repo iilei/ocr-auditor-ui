@@ -127,6 +127,7 @@ class DocView {
     this._stage.add(this._layers.root);
 
     var timeout = setTimeout(() => {}, this._delay);
+    var stickTo: any = null;
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
@@ -146,15 +147,33 @@ class DocView {
                 const box = new Konva.Rect(options);
                 box.on('mouseover', evt => {
                   this._node = box;
-                  timeout = setTimeout(() => {
-                    evt.target.opacity(1);
-                    this._layers.root.draw();
-                  }, this._delay);
+                  if (!stickTo) {
+                    timeout = setTimeout(() => {
+                      evt.target.opacity(1);
+                      this._layers.root.draw();
+                    }, this._delay);
+                  }
                 });
                 box.on('mouseout', evt => {
                   clearTimeout(timeout);
-                  this._node = blankNode;
-                  evt.target.opacity(0);
+                  if (!stickTo) {
+                    this._node = blankNode;
+                    evt.target.opacity(0);
+                    this._layers.root.draw();
+                  }
+                });
+                box.on('dblclick', evt => {
+                  clearTimeout(timeout);
+
+                  // TOD if shift: add, otherwise make it a new selection
+
+                  this._node = box;
+                  evt.target.opacity(1);
+                  // @ts-ignore
+                  evt.target.setFill(evt.target.getStroke());
+                  // @ts-ignore
+                  group.setGlobalCompositeOperation('multiply');
+                  stickTo = evt.target;
                   this._layers.root.draw();
                 });
 
