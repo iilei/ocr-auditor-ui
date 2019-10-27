@@ -128,10 +128,6 @@ export type ImgMeta = {
   err: number;
 };
 
-export type View = {
-  select: string | Array<string>;
-};
-
 const blankNode = new Konva.Rect({ visible: false });
 
 class DocView {
@@ -139,6 +135,7 @@ class DocView {
   _stage: Konva.Stage;
   _layers: Record<'root', Konva.Layer>;
   _node: Konva.Node;
+  _img: Konva.Group;
   _sticky: Konva.Node | null;
   _ready: boolean;
   _delay: number;
@@ -155,14 +152,23 @@ class DocView {
     this._ready = false;
     this._delay = 75;
     this.state = { assumeSecondClick: true };
+    const { image, id } = this._view;
+    const group = new Konva.Group({ id, name: 'img' });
+    this._layers.root.add(group);
+    this._img = group;
 
     return this;
   }
 
-  init = (view: View) => {
+  init = () => {
     this._layers.root.clear();
     this._layers.root.on('click', this.clickHandler);
-    return this.loadImage();
+
+    return this.loadImage().then(result => {
+      this.walkThrough();
+      this._ready = true;
+      return result;
+    });
   };
 
   clickHandler = (event: KonvaEventObject<MouseEvent>) => {
@@ -252,10 +258,20 @@ class DocView {
     this._layers.root.draw();
   };
 
+  highlightById = (highlight: string) => {
+    if (!this._ready) {
+      throw new Error('Not yet initialized!');
+    }
+    const box = this._stage.findOne<Konva.Group>(`#${highlight}`);
+    this.highlight(box.findOne('Shape'));
+  };
+
+  highlight = (box: Konva.Rect) => {
+    box.fire('dblclick', {}, true);
+  };
+
   private loadImage = () => {
     const { image } = this._view;
-    const group = new Konva.Group({ name: `img ${image}` });
-    this._layers.root.add(group);
     const imageObj = new Image();
 
     return new Promise<ImgMeta>((resolve, reject) => {
@@ -269,9 +285,8 @@ class DocView {
           height,
         });
 
-        group.add(img);
+        this._img.add(img);
         this._layers.root.draw();
-        this.walkThrough();
 
         resolve({
           height,

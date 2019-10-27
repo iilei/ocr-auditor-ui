@@ -41,6 +41,7 @@ class DocLoader {
           contentType,
           ocrCapabilities,
           ocrSystem,
+          id: pageDoc.id,
           ...pageDoc,
         };
         this._view = view;

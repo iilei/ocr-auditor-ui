@@ -1,14 +1,9 @@
-import React, { createRef, Component, SyntheticEvent, PropsWithoutRef } from 'react';
+import React, { createRef, Component } from 'react';
 import { RouteComponentProps } from 'react-router';
-import { BrowserRouter as Router, Switch, Route, Link, withRouter } from 'react-router-dom';
-
-import { throttle } from 'lodash';
-import { render } from 'react-dom';
-import { Stage, StageProps } from 'react-konva';
+import { withRouter } from 'react-router-dom';
+import { Stage } from 'react-konva';
 import { DocLoader, DocView } from './modules';
-import { ImgMeta, View } from './modules/docView';
 import { KonvaEventObject } from 'konva/types/Node';
-import Konva from 'konva';
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
@@ -24,12 +19,12 @@ interface Cancelable {
 }
 
 class HocrView extends Component<PropsType> {
-  private stageRef = createRef<Stage>();
-  private docLoader: DocLoader;
+  readonly stageRef = createRef<Stage>();
+  readonly docLoader: DocLoader;
 
   state = {
-    width: 0,
-    height: 0,
+    width: 300,
+    height: 300,
   };
   updateDimensionsThrottled: any;
 
@@ -44,33 +39,21 @@ class HocrView extends Component<PropsType> {
   }
 
   componentDidMount() {
-    this.updateDimensionsThrottled = throttle(this.updateDimensions, 300, { trailing: true, leading: false });
-    window.addEventListener('resize', this.updateDimensionsThrottled);
-
     const node = this.stageRef.current;
 
     if (node) {
-      const doc = this.docLoader.get().then(
+      this.docLoader.get().then(
         async view => {
           const docView = new DocView(node.getStage(), this.docLoader);
-          const { width, height } = await docView.init({ select: 'x' });
+          const { width, height } = await docView.init();
+          //          const hash = document.location.hash.replace(/^#?/, '')
+          docView.highlightById('line_1_7');
           this.setState({ width, height });
         },
         error => {},
       );
     }
   }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.updateDimensionsThrottled);
-    this.updateDimensionsThrottled.cancel();
-  }
-
-  updateDimensions = (event?: SyntheticEvent): Cancelable | void => {
-    const { current: stageRef } = this.stageRef;
-    if (stageRef && event) {
-    }
-  };
 
   handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
@@ -86,7 +69,15 @@ class HocrView extends Component<PropsType> {
 
   render() {
     const { width, height } = this.state;
-    return <Stage ref={this.stageRef} width={width} height={height} />;
+    return (
+      <Stage
+        ref={this.stageRef}
+        width={width}
+        height={height}
+        onClick={this.handleDoubleClick}
+        onDblClick={this.handleDoubleClick}
+      />
+    );
   }
 }
 

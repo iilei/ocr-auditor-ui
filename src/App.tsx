@@ -83,7 +83,7 @@ const App: React.FC = () => {
       <ThemeProvider theme={{ awesomegrid: customConf }}>
         <React.Fragment>
           <Route exact path="/">
-            <Redirect to="/doc/phototest/1" />
+            <Redirect to="/doc/phototest/1/#line_1_7" />
           </Route>
           <Route path="/doc/:id/:page?">
             <React.Fragment>
