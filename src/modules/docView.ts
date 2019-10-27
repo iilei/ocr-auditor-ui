@@ -174,8 +174,13 @@ class DocView {
   clickHandler = (event: KonvaEventObject<MouseEvent>) => {
     const possiblyDoubleClick = setTimeout(() => {
       if (event.evt.detail === 1 && this.state.assumeSecondClick) {
-        // it is assured no click happened within the last 330 ms
-        this._sticky && this._sticky.opacity(0);
+        if (this._sticky) {
+          // @ts-ignore
+          const isInsideSticky = event.target.findAncestor(node => this._sticky && node === this._sticky.getParent());
+          if (!isInsideSticky) {
+            this._sticky.opacity(0);
+          }
+        }
         this._layers.root.batchDraw();
       }
       this.setState({ assumeSecondClick: true });
