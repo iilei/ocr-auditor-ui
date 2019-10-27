@@ -40,8 +40,7 @@ type ScopePaint = {
 const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   careas: {
     bbox: {
-      stroke: 'rgba(255, 152, 0, .7)',
-      strokeWidth: 1,
+      fill: 'rgba(255, 152, 0, .35)',
       opacity: 0,
       lineJoin: 'round',
       cornerRadius: 2,
@@ -49,8 +48,7 @@ const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   },
   pars: {
     bbox: {
-      stroke: 'rgba(0, 188, 212, .7)',
-      strokeWidth: 1,
+      fill: 'rgba(0, 188, 212, .35)',
       opacity: 0,
       lineJoin: 'round',
       cornerRadius: 2,
@@ -58,8 +56,7 @@ const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   },
   lines: {
     bbox: {
-      stroke: 'rgba(0, 188, 212, .7)',
-      strokeWidth: 1,
+      fill: 'rgba(0, 188, 212, .35)',
       opacity: 0,
       lineJoin: 'round',
       cornerRadius: 2,
@@ -67,11 +64,10 @@ const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
   },
   words: {
     bbox: {
-      stroke: 'rgba(0, 188, 212, .7)',
-      strokeWidth: 4,
+      fill: 'rgba(0, 188, 212, .35)',
       opacity: 0,
       lineJoin: 'round',
-      cornerRadius: 2,
+      cornerRadius: 3,
       hitStrokeWidth: 16,
     },
   },
@@ -88,8 +84,9 @@ class DocView {
   _view: Record<string, any>;
   _image: ImgMeta;
   _stage: Konva.Stage;
-  _layers: Record<'root' | 'image', Konva.Layer>;
+  _layers: Record<'root', Konva.Layer>;
   _node: Konva.Node;
+  _sticky: Konva.Node | null;
   _ready: boolean;
   _delay: number;
 
@@ -99,8 +96,9 @@ class DocView {
     const { view } = doc;
     this._view = view;
     this._stage = stageNode;
-    this._layers = { root: blank, image: blank };
+    this._layers = { root: blank };
     this._node = blankNode;
+    this._sticky = blankNode;
     this._ready = false;
     this._delay = 75;
     this._image = {
@@ -121,13 +119,13 @@ class DocView {
     // indicate the stage is ready
   };
 
+  unsetSticky = () => {};
+
   walkThrough = () => {
-    this._layers.root = new Konva.Layer();
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
     this._stage.add(this._layers.root);
 
     var timeout = setTimeout(() => {}, this._delay);
-    var stickTo: any = null;
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
@@ -145,9 +143,11 @@ class DocView {
                   ...potentialConfig,
                 };
                 const box = new Konva.Rect(options);
+                box.globalCompositeOperation('multiply');
+
                 box.on('mouseover', evt => {
                   this._node = box;
-                  if (!stickTo) {
+                  if (!this._sticky) {
                     timeout = setTimeout(() => {
                       evt.target.opacity(1);
                       this._layers.root.draw();
@@ -156,24 +156,22 @@ class DocView {
                 });
                 box.on('mouseout', evt => {
                   clearTimeout(timeout);
-                  if (!stickTo) {
+                  if (!this._sticky) {
                     this._node = blankNode;
                     evt.target.opacity(0);
                     this._layers.root.draw();
                   }
                 });
+                // sticky
                 box.on('dblclick', evt => {
                   clearTimeout(timeout);
-
-                  // TOD if shift: add, otherwise make it a new selection
-
+                  if (this._sticky && evt.currentTarget !== this._sticky) {
+                    this._sticky.opacity(0);
+                  }
                   this._node = box;
                   evt.target.opacity(1);
                   // @ts-ignore
-                  evt.target.setFill(evt.target.getStroke());
-                  // @ts-ignore
-                  group.setGlobalCompositeOperation('multiply');
-                  stickTo = evt.target;
+                  this._sticky = evt.currentTarget;
                   this._layers.root.draw();
                 });
 
@@ -181,7 +179,6 @@ class DocView {
               }
             }
           });
-          // To get dimensions of paragraphs, use group.getClientRect()
 
           parent.add(group);
         });
@@ -195,7 +192,8 @@ class DocView {
 
   private loadImage = (callback: Function) => {
     const { image } = this._view;
-    const layer = new Konva.Layer();
+    const group = new Konva.Group({ name: `img ${image}` });
+    this._layers.root.add(group);
     const imageObj = new Image();
 
     imageObj.onload = () => {
@@ -212,10 +210,8 @@ class DocView {
         height,
       });
 
-      layer.add(img);
-      layer.batchDraw();
-      this._stage.add(layer);
-      this._layers.image = layer;
+      group.add(img);
+      this._layers.root.draw();
 
       this.walkThrough();
       callback(this._image);
