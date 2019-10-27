@@ -30,7 +30,6 @@ class HocrView extends Component<PropsType> {
   state = {
     width: 0,
     height: 0,
-    assumeSecondClick: true,
   };
   updateDimensionsThrottled: any;
 
@@ -45,7 +44,7 @@ class HocrView extends Component<PropsType> {
   }
 
   componentDidMount() {
-    this.updateDimensionsThrottled = throttle(this.updateDimensions, 333, { trailing: true, leading: false });
+    this.updateDimensionsThrottled = throttle(this.updateDimensions, 300, { trailing: true, leading: false });
     window.addEventListener('resize', this.updateDimensionsThrottled);
 
     const node = this.stageRef.current;
@@ -74,22 +73,6 @@ class HocrView extends Component<PropsType> {
     }
   };
 
-  clickHandler = (event: KonvaEventObject<MouseEvent>) => {
-    // TODO bind to keyboard shortcuts; tab through, pageDown to select next paragraph?
-    const possiblyDoubleClick = setTimeout(() => {
-      if (event.evt.detail === 1 && this.state.assumeSecondClick) {
-        this.handleSingleClick(event);
-      }
-      this.setState({ assumeSecondClick: true });
-    }, 330);
-    // it was a double click
-    if (event.evt.detail === 2) {
-      window.clearTimeout(possiblyDoubleClick);
-      this.setState({ assumeSecondClick: false });
-      this.handleDoubleClick(event);
-    }
-  };
-
   handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} clicked`);
@@ -104,7 +87,7 @@ class HocrView extends Component<PropsType> {
 
   render() {
     const { width, height } = this.state;
-    return <Stage ref={this.stageRef} width={width} height={height} onClick={this.clickHandler} />;
+    return <Stage ref={this.stageRef} width={width} height={height} />;
   }
 }
 

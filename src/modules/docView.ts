@@ -5,6 +5,7 @@ import { traverseFactory, bboxToKonvaRect } from '../modules';
 import { Group } from 'konva/types/Group';
 import { ShapeConfig } from 'konva/types/Shape';
 import { KonvaNodeComponent } from 'react-konva';
+import { KonvaEventObject } from 'konva/types/Node';
 
 // TODO how to get this dry?
 const scopeKeys = ['careas', 'pars', 'lines', 'words'];
@@ -34,41 +35,89 @@ type BoxPaint = {
 };
 
 type ScopePaint = {
-  bbox?: ShapeConfig;
+  bbox: {
+    common: ShapeConfig;
+    temporary: ShapeConfig;
+    persistent: ShapeConfig;
+  };
 };
 
-const groups: { [k: string]: { bbox?: ScopePaint['bbox'] } } = {
+const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
   careas: {
     bbox: {
-      fill: 'rgba(255, 152, 0, .35)',
-      opacity: 0,
-      lineJoin: 'round',
-      cornerRadius: 2,
+      common: {
+        strokeWidth: 0,
+        opacity: 0,
+        lineJoin: 'round',
+        cornerRadius: 2,
+      },
+      temporary: {
+        stroke: 'rgba(255, 152, 0, .35)',
+        strokeWidth: 2,
+        opacity: 1,
+      },
+      persistent: {
+        fill: 'rgba(255, 152, 0, .35)',
+        opacity: 1,
+      },
     },
   },
   pars: {
     bbox: {
-      fill: 'rgba(0, 188, 212, .35)',
-      opacity: 0,
-      lineJoin: 'round',
-      cornerRadius: 2,
+      common: {
+        strokeWidth: 0,
+        opacity: 0,
+        lineJoin: 'round',
+        cornerRadius: 2,
+      },
+      temporary: {
+        stroke: 'rgba(255, 152, 0, .35)',
+        strokeWidth: 2,
+        opacity: 1,
+      },
+      persistent: {
+        fill: 'rgba(255, 152, 0, .35)',
+        opacity: 1,
+      },
     },
   },
   lines: {
     bbox: {
-      fill: 'rgba(0, 188, 212, .35)',
-      opacity: 0,
-      lineJoin: 'round',
-      cornerRadius: 2,
+      common: {
+        strokeWidth: 0,
+        opacity: 0,
+        lineJoin: 'round',
+        cornerRadius: 2,
+      },
+      temporary: {
+        stroke: 'rgba(255, 152, 0, .35)',
+        strokeWidth: 2,
+        opacity: 1,
+      },
+      persistent: {
+        fill: 'rgba(255, 152, 0, .35)',
+        opacity: 1,
+      },
     },
   },
   words: {
     bbox: {
-      fill: 'rgba(0, 188, 212, .35)',
-      opacity: 0,
-      lineJoin: 'round',
-      cornerRadius: 3,
-      hitStrokeWidth: 16,
+      common: {
+        strokeWidth: 0,
+        opacity: 0,
+        lineJoin: 'round',
+        cornerRadius: 3,
+        hitStrokeWidth: 16,
+      },
+      temporary: {
+        stroke: 'rgba(20, 188, 212, .35)',
+        strokeWidth: 2,
+        opacity: 1,
+      },
+      persistent: {
+        fill: 'rgba(20, 188, 212, .35)',
+        opacity: 1,
+      },
     },
   },
 };
@@ -89,6 +138,7 @@ class DocView {
   _sticky: Konva.Node | null;
   _ready: boolean;
   _delay: number;
+  state: Record<string, any>;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
     const blank = new Konva.Layer();
@@ -101,6 +151,7 @@ class DocView {
     this._sticky = blankNode;
     this._ready = false;
     this._delay = 75;
+    this.state = { assumeSecondClick: true };
     this._image = {
       height: 0,
       width: 0,
@@ -111,6 +162,7 @@ class DocView {
 
   init = (callback: Function) => {
     this._layers.root.clear();
+    this._layers.root.on('click', this.clickHandler);
 
     this.loadImage(callback);
   };
@@ -119,7 +171,25 @@ class DocView {
     // indicate the stage is ready
   };
 
-  unsetSticky = () => {};
+  clickHandler = (event: KonvaEventObject<MouseEvent>) => {
+    const possiblyDoubleClick = setTimeout(() => {
+      if (event.evt.detail === 1 && this.state.assumeSecondClick) {
+        // it is assured no click happened within the last 330 ms
+        this._sticky && this._sticky.opacity(0);
+        this._layers.root.batchDraw();
+      }
+      this.setState({ assumeSecondClick: true });
+    }, 250);
+
+    if (event.evt.detail === 2) {
+      window.clearTimeout(possiblyDoubleClick);
+      this.setState({ assumeSecondClick: false });
+    }
+  };
+
+  setState = (updates: Record<string, any>) => {
+    Object.assign(this.state, { ...updates });
+  };
 
   walkThrough = () => {
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
@@ -136,43 +206,41 @@ class DocView {
           const group = new Konva.Group({ id: scope.id, name: scope.content });
           Object.entries(scope).forEach(([prop, opts]: [string, any]) => {
             if (groups[key] && prop === 'bbox') {
-              const potentialConfig = groups[key][prop];
-              if (typeof potentialConfig === 'object') {
+              const config = groups[key].bbox;
+              if (typeof config === 'object') {
                 const options: ShapeConfig = {
                   ...bboxToKonvaRect(scope.bbox),
-                  ...potentialConfig,
+                  ...config.common,
                 };
                 const box = new Konva.Rect(options);
                 box.globalCompositeOperation('multiply');
 
                 box.on('mouseover', evt => {
                   this._node = box;
-                  if (!this._sticky) {
-                    timeout = setTimeout(() => {
-                      evt.target.opacity(1);
-                      this._layers.root.draw();
-                    }, this._delay);
-                  }
+                  timeout = setTimeout(() => {
+                    evt.target.setAttrs({ ...config.common, ...config.temporary });
+                    this._layers.root.batchDraw();
+                  }, this._delay);
                 });
                 box.on('mouseout', evt => {
                   clearTimeout(timeout);
-                  if (!this._sticky) {
+                  if (!this._sticky || evt.currentTarget !== this._sticky) {
                     this._node = blankNode;
-                    evt.target.opacity(0);
-                    this._layers.root.draw();
+                    evt.target.setAttrs({ ...config.common });
+                    this._layers.root.batchDraw();
                   }
                 });
                 // sticky
                 box.on('dblclick', evt => {
                   clearTimeout(timeout);
                   if (this._sticky && evt.currentTarget !== this._sticky) {
-                    this._sticky.opacity(0);
+                    // reset sticky, it's gonna be a new node
+                    this._sticky.setAttrs({ ...config.common });
                   }
                   this._node = box;
-                  evt.target.opacity(1);
-                  // @ts-ignore
+                  evt.target.setAttrs({ ...config.common, ...config.persistent });
                   this._sticky = evt.currentTarget;
-                  this._layers.root.draw();
+                  this._layers.root.batchDraw();
                 });
 
                 group.add(box);
