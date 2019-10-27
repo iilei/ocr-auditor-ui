@@ -52,12 +52,12 @@ const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
         cornerRadius: 2,
       },
       temporary: {
-        stroke: 'rgba(255, 152, 0, .35)',
+        stroke: 'rgba(146, 204, 101, .35)',
         strokeWidth: 2,
         opacity: 1,
       },
       persistent: {
-        fill: 'rgba(255, 152, 0, .35)',
+        fill: 'rgba(146, 204, 101, .35)',
         opacity: 1,
       },
     },
@@ -90,12 +90,12 @@ const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
         cornerRadius: 2,
       },
       temporary: {
-        stroke: 'rgba(255, 152, 0, .35)',
+        stroke: 'rgba(156, 39, 176, .35)',
         strokeWidth: 2,
         opacity: 1,
       },
       persistent: {
-        fill: 'rgba(255, 152, 0, .35)',
+        fill: 'rgba(156, 39, 176, .35)',
         opacity: 1,
       },
     },
@@ -289,6 +289,8 @@ class DocView {
           width,
           height,
         });
+
+        img.globalCompositeOperation('multiply');
 
         this._img.add(img);
         this._layers.root.draw();

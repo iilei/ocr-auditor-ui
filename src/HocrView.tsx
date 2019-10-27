@@ -23,8 +23,8 @@ class HocrView extends Component<PropsType> {
   readonly docLoader: DocLoader;
 
   state = {
-    width: 300,
-    height: 300,
+    width: 0,
+    height: 0,
   };
   updateDimensionsThrottled: any;
 
@@ -47,7 +47,7 @@ class HocrView extends Component<PropsType> {
           const docView = new DocView(node.getStage(), this.docLoader);
           const { width, height } = await docView.init();
           //          const hash = document.location.hash.replace(/^#?/, '')
-          docView.highlightById('line_1_7');
+          docView.highlightById('par_1_2');
           this.setState({ width, height });
         },
         error => {},
