@@ -125,13 +125,17 @@ const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
 export type ImgMeta = {
   width: number;
   height: number;
+  err: number;
+};
+
+export type View = {
+  select: string | Array<string>;
 };
 
 const blankNode = new Konva.Rect({ visible: false });
 
 class DocView {
   _view: Record<string, any>;
-  _image: ImgMeta;
   _stage: Konva.Stage;
   _layers: Record<'root', Konva.Layer>;
   _node: Konva.Node;
@@ -142,7 +146,6 @@ class DocView {
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
     const blank = new Konva.Layer();
-
     const { view } = doc;
     this._view = view;
     this._stage = stageNode;
@@ -152,23 +155,14 @@ class DocView {
     this._ready = false;
     this._delay = 75;
     this.state = { assumeSecondClick: true };
-    this._image = {
-      height: 0,
-      width: 0,
-    };
 
     return this;
   }
 
-  init = (callback: Function) => {
+  init = (view: View) => {
     this._layers.root.clear();
     this._layers.root.on('click', this.clickHandler);
-
-    this.loadImage(callback);
-  };
-
-  onExternalReady = () => {
-    // indicate the stage is ready
+    return this.loadImage();
   };
 
   clickHandler = (event: KonvaEventObject<MouseEvent>) => {
@@ -195,7 +189,7 @@ class DocView {
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
     this._stage.add(this._layers.root);
 
-    var timeout = setTimeout(() => {}, this._delay);
+    let timeout = setTimeout(() => {}, this._delay);
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
@@ -258,45 +252,39 @@ class DocView {
     this._layers.root.draw();
   };
 
-  private loadImage = (callback: Function) => {
+  private loadImage = () => {
     const { image } = this._view;
     const group = new Konva.Group({ name: `img ${image}` });
     this._layers.root.add(group);
     const imageObj = new Image();
 
-    imageObj.onload = () => {
-      const { naturalHeight: height, naturalWidth: width } = imageObj;
-      this._image = {
-        height,
-        width,
+    return new Promise<ImgMeta>((resolve, reject) => {
+      imageObj.onload = () => {
+        const { naturalHeight: height, naturalWidth: width } = imageObj;
+        const img = new Konva.Image({
+          x: 0,
+          y: 0,
+          image: imageObj,
+          width,
+          height,
+        });
+
+        group.add(img);
+        this._layers.root.draw();
+        this.walkThrough();
+
+        resolve({
+          height,
+          width,
+          err: 0,
+        });
       };
-      var img = new Konva.Image({
-        x: 0,
-        y: 0,
-        image: imageObj,
-        width,
-        height,
-      });
 
-      group.add(img);
-      this._layers.root.draw();
-
-      this.walkThrough();
-      callback(this._image);
-    };
-    imageObj.src = image;
+      imageObj.onerror = () => reject({ width: 0, height: 0, err: 1 });
+      imageObj.onabort = () => reject({ width: 0, height: 0, err: 2 });
+      imageObj.src = image;
+    });
   };
-
-  get image() {
-    return this._image;
-  }
-
-  set ready(isReady: boolean | number | undefined | null) {
-    this._ready = Boolean(isReady);
-    if (isReady) {
-      this.onExternalReady();
-    }
-  }
 }
 
 export default DocView;

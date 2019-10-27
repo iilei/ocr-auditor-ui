@@ -6,7 +6,7 @@ import { throttle } from 'lodash';
 import { render } from 'react-dom';
 import { Stage, StageProps } from 'react-konva';
 import { DocLoader, DocView } from './modules';
-import { ImgMeta } from './modules/docView';
+import { ImgMeta, View } from './modules/docView';
 import { KonvaEventObject } from 'konva/types/Node';
 import Konva from 'konva';
 
@@ -51,11 +51,10 @@ class HocrView extends Component<PropsType> {
 
     if (node) {
       const doc = this.docLoader.get().then(
-        view => {
+        async view => {
           const docView = new DocView(node.getStage(), this.docLoader);
-          docView.init(({ width, height }: ImgMeta) => {
-            this.setState({ width, height }, () => (docView.ready = true));
-          });
+          const { width, height } = await docView.init({ select: 'x' });
+          this.setState({ width, height });
         },
         error => {},
       );
