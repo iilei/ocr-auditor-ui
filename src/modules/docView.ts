@@ -162,34 +162,46 @@ class DocView {
 
   init = () => {
     this._layers.root.clear();
-    this._layers.root.on('click', this.clickHandler);
 
     return this.loadImage().then(result => {
       this.walkThrough();
+      this.keyLog();
       this._ready = true;
       return result;
     });
   };
 
-  clickHandler = (event: KonvaEventObject<MouseEvent>) => {
-    const possiblyDoubleClick = setTimeout(() => {
-      if (event.evt.detail === 1 && this.state.assumeSecondClick) {
-        if (this._sticky) {
-          // @ts-ignore
-          const isInsideSticky = event.target.findAncestor(node => this._sticky && node === this._sticky.getParent());
-          if (!isInsideSticky) {
-            this._sticky.opacity(0);
-          }
-        }
-        this._layers.root.batchDraw();
-      }
-      this.setState({ assumeSecondClick: true });
-    }, 250);
+  keyLog = () => {
+    const container = this._stage.container();
 
-    if (event.evt.detail === 2) {
-      window.clearTimeout(possiblyDoubleClick);
-      this.setState({ assumeSecondClick: false });
-    }
+    container.addEventListener(
+      'keydown',
+      event => {
+        if (event.defaultPrevented) {
+          return; // Do nothing if the event was already processed
+        }
+
+        switch (event.key) {
+          case 'Tab':
+            // Do something for "down arrow" key press.
+            // double-tab to leave the stage
+            // single tab to go to next word
+            // shift-tab -> previous word
+            break;
+          case 'Esc': // IE/Edge specific value
+          case 'Escape':
+            // Do something for "esc" key press.
+            break;
+          default:
+            console.log(event);
+            return; // Quit when this doesn't handle the key event.
+        }
+
+        // Cancel the default action to avoid it being handled twice
+        event.preventDefault();
+      },
+      true,
+    );
   };
 
   setState = (updates: Record<string, any>) => {
@@ -200,7 +212,7 @@ class DocView {
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
     this._stage.add(this._layers.root);
 
-    let timeout = setTimeout(() => {}, this._delay);
+    let timeout = setTimeout(() => {}, 0);
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
@@ -227,16 +239,18 @@ class DocView {
                     this._layers.root.batchDraw();
                   }, this._delay);
                 });
+
                 box.on('mouseout', evt => {
                   clearTimeout(timeout);
-                  if (!this._sticky || evt.currentTarget !== this._sticky) {
+                  if (evt.currentTarget !== this._sticky) {
                     this._node = blankNode;
                     evt.target.setAttrs({ ...config.common });
                     this._layers.root.batchDraw();
                   }
                 });
+
                 // sticky
-                box.on('dblclick', evt => {
+                box.on('click', evt => {
                   clearTimeout(timeout);
                   if (this._sticky && evt.currentTarget !== this._sticky) {
                     // reset sticky, it's gonna be a new node
@@ -272,7 +286,7 @@ class DocView {
   };
 
   highlight = (box: Konva.Rect) => {
-    box.fire('dblclick', {}, true);
+    box.fire('click', {}, true);
   };
 
   private loadImage = () => {

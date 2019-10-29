@@ -71,6 +71,7 @@ class HocrView extends Component<PropsType> {
     const { width, height } = this.state;
     return (
       <Stage
+        tabIndex={1}
         ref={this.stageRef}
         width={width}
         height={height}
