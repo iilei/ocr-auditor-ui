@@ -201,7 +201,7 @@ class DocView {
       this._sticky.findOne('Rect').setAttrs(groups.words.bbox.common);
     }
     this._layers.root.batchDraw();
-    this._refs.words[nextStickyIndex].findOne('Rect').fire('click', {}, true);
+    this._refs.words[nextStickyIndex].findOne('Rect').fire('dblclick', {}, true);
   };
 
   keyLog = () => {
@@ -284,12 +284,12 @@ class DocView {
                 });
 
                 // sticky
-                box.on('click', evt => {
+                box.on('dblclick', evt => {
                   const parent: Konva.Group = <Group>evt.currentTarget.findAncestor('Group', true);
                   clearTimeout(timeout);
-                  if (parent !== this._sticky) {
+                  if (parent !== this._sticky && this._sticky) {
                     // reset sticky, it's gonna be a new node
-                    evt.currentTarget.setAttrs({ ...config.common });
+                    this._sticky.findOne('Rect').setAttrs({ ...config.common });
                   }
                   this._node = box;
                   evt.target.setAttrs({ ...config.common, ...config.persistent });

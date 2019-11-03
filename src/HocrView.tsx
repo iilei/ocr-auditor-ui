@@ -55,12 +55,6 @@ class HocrView extends Component<PropsType> {
     }
   }
 
-  handleSingleClick = (event: KonvaEventObject<MouseEvent>) => {
-    const scopeId = event.target.getParent().getId();
-    console.log(`${scopeId} clicked`);
-    console.log(event.target.getParent().attrs.name);
-  };
-
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
     const scopeId = event.target.getParent().getId();
     console.log(`${scopeId} double clicked`);
@@ -69,16 +63,7 @@ class HocrView extends Component<PropsType> {
 
   render() {
     const { width, height } = this.state;
-    return (
-      <Stage
-        tabIndex={1}
-        ref={this.stageRef}
-        width={width}
-        height={height}
-        onClick={this.handleDoubleClick}
-        onDblClick={this.handleDoubleClick}
-      />
-    );
+    return <Stage tabIndex={1} ref={this.stageRef} width={width} height={height} onDblClick={this.handleDoubleClick} />;
   }
 }
 
