@@ -194,7 +194,7 @@ class DocView {
       } else if (stickyIndex === 0 && reverse) {
         nextStickyIndex = wordCount - 1;
       } else {
-        nextStickyIndex = (stickyIndex + 1 * (reverse ? -1 : 1)) % wordCount;
+        nextStickyIndex = (stickyIndex + (reverse ? -1 : 1)) % wordCount;
       }
     }
     if (this._sticky) {
