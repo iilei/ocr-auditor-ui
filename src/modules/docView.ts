@@ -136,9 +136,10 @@ class DocView {
   _layers: Record<'root', Konva.Layer>;
   _node: Konva.Node;
   _img: Konva.Group;
-  _sticky: Konva.Node | null;
+  _sticky: Konva.Group | null;
   _ready: boolean;
   _delay: number;
+  _refs: Record<ScopeKeys, Array<Konva.Group>>;
   state: Record<string, any>;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
@@ -148,14 +149,19 @@ class DocView {
     this._stage = stageNode;
     this._layers = { root: blank };
     this._node = blankNode;
-    this._sticky = blankNode;
+    this._sticky = null;
     this._ready = false;
     this._delay = 75;
     this.state = { assumeSecondClick: true };
-    const { image, id } = this._view;
-    const group = new Konva.Group({ id, name: 'img' });
+    const group = new Konva.Group({ name: 'img' });
     this._layers.root.add(group);
     this._img = group;
+    this._refs = {
+      careas: [],
+      pars: [],
+      lines: [],
+      words: [],
+    };
 
     return this;
   }
@@ -163,12 +169,39 @@ class DocView {
   init = () => {
     this._layers.root.clear();
 
-    return this.loadImage().then(result => {
+    return this.loadImage().then(dimensions => {
       this.walkThrough();
       this.keyLog();
       this._ready = true;
-      return result;
+      return dimensions;
     });
+  };
+
+  tabSelect = (reverse = false) => {
+    let nextStickyIndex;
+    const wordCount = this._refs.words.length;
+    // shift-tab -> previous word
+    if (!this._sticky) {
+      // assign first / last node to selection
+      nextStickyIndex = reverse ? wordCount - 1 : 0;
+    } else {
+      const {
+        attrs: { id: curId },
+      } = this._sticky;
+      const stickyIndex = this._refs.words.findIndex(({ attrs: { id } }) => id === curId);
+      if (stickyIndex === wordCount - 1 && !reverse) {
+        nextStickyIndex = 0;
+      } else if (stickyIndex === 0 && reverse) {
+        nextStickyIndex = wordCount - 1;
+      } else {
+        nextStickyIndex = (stickyIndex + 1 * (reverse ? -1 : 1)) % wordCount;
+      }
+    }
+    if (this._sticky) {
+      this._sticky.findOne('Rect').setAttrs(groups.words.bbox.common);
+    }
+    this._layers.root.batchDraw();
+    this._refs.words[nextStickyIndex].findOne('Rect').fire('click', {}, true);
   };
 
   keyLog = () => {
@@ -177,23 +210,24 @@ class DocView {
     container.addEventListener(
       'keydown',
       event => {
-        if (event.defaultPrevented) {
+        const { shiftKey, defaultPrevented, key, altKey } = event;
+        if (defaultPrevented) {
           return; // Do nothing if the event was already processed
         }
 
-        switch (event.key) {
+        switch (key) {
           case 'Tab':
             // Do something for "down arrow" key press.
             // double-tab to leave the stage
             // single tab to go to next word
-            // shift-tab -> previous word
+            this.tabSelect(shiftKey);
             break;
           case 'Esc': // IE/Edge specific value
           case 'Escape':
             // Do something for "esc" key press.
             break;
           default:
-            console.log(event);
+            console.log(key);
             return; // Quit when this doesn't handle the key event.
         }
 
@@ -216,7 +250,7 @@ class DocView {
 
     // TODO make private and rename
     scopeKeys.forEach(key => {
-      const operation = (view: ScopeBranch, [key, val]: [string, Array<ScopeBranch & ScopePaint>]) => {
+      const operation = (view: ScopeBranch, [key, val]: [ScopeKeys, Array<ScopeBranch & ScopePaint>]) => {
         const parent: Group = this._stage.findOne(`#${view.id}`);
 
         val.forEach(scope => {
@@ -242,7 +276,7 @@ class DocView {
 
                 box.on('mouseout', evt => {
                   clearTimeout(timeout);
-                  if (evt.currentTarget !== this._sticky) {
+                  if (evt.currentTarget.findAncestor('Group', true) !== this._sticky) {
                     this._node = blankNode;
                     evt.target.setAttrs({ ...config.common });
                     this._layers.root.batchDraw();
@@ -251,14 +285,15 @@ class DocView {
 
                 // sticky
                 box.on('click', evt => {
+                  const parent: Konva.Group = <Group>evt.currentTarget.findAncestor('Group', true);
                   clearTimeout(timeout);
-                  if (this._sticky && evt.currentTarget !== this._sticky) {
+                  if (parent !== this._sticky) {
                     // reset sticky, it's gonna be a new node
-                    this._sticky.setAttrs({ ...config.common });
+                    evt.currentTarget.setAttrs({ ...config.common });
                   }
                   this._node = box;
                   evt.target.setAttrs({ ...config.common, ...config.persistent });
-                  this._sticky = evt.currentTarget;
+                  this._sticky = parent;
                   this._layers.root.batchDraw();
                 });
 
@@ -268,6 +303,7 @@ class DocView {
           });
 
           parent.add(group);
+          this._refs[key].push(group);
         });
       };
 
