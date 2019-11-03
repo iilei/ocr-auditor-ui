@@ -322,7 +322,7 @@ class DocView {
   };
 
   highlight = (box: Konva.Rect) => {
-    box.fire('click', {}, true);
+    box.fire('dblclick', {}, true);
   };
 
   private loadImage = () => {
