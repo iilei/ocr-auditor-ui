@@ -7,6 +7,9 @@ import { ShapeConfig } from 'konva/types/Shape';
 import { KonvaNodeComponent } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
+// @ts-ignore
+import colorBetween from 'color-between';
+
 // TODO how to get this dry?
 const scopeKeys = ['careas', 'pars', 'lines', 'words'];
 type ScopeKeys = 'careas' | 'pars' | 'lines' | 'words';
@@ -139,7 +142,7 @@ class DocView {
   _sticky: Konva.Group | null;
   _ready: boolean;
   _delay: number;
-  _refs: Record<ScopeKeys, Array<Konva.Group>>;
+  _refs: Record<ScopeKeys | 'xWconfs', Array<Konva.Group>>;
   state: Record<string, any>;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
@@ -161,6 +164,7 @@ class DocView {
       pars: [],
       lines: [],
       words: [],
+      xWconfs: [],
     };
 
     return this;
@@ -176,6 +180,8 @@ class DocView {
       return dimensions;
     });
   };
+
+  confidenceColor = (confidence: number) => colorBetween('rgb(255,96,0)', 'rgb(37,255,0)', confidence * 0.01, 'rgb');
 
   tabSelect = (reverse = false) => {
     let nextStickyIndex;
@@ -243,6 +249,7 @@ class DocView {
   };
 
   walkThrough = () => {
+    this._layers.root.add(new Konva.Group({ id: `${this._view.id}_xWconf` }));
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
     this._stage.add(this._layers.root);
 
@@ -252,9 +259,12 @@ class DocView {
     scopeKeys.forEach(key => {
       const operation = (view: ScopeBranch, [key, val]: [ScopeKeys, Array<ScopeBranch & ScopePaint>]) => {
         const parent: Group = this._stage.findOne(`#${view.id}`);
+        const confParent: Group = this._stage.findOne(`#${view.id}_xWconf`);
 
         val.forEach(scope => {
           const group = new Konva.Group({ id: scope.id, name: scope.content });
+          const xWconfGroup = new Konva.Group({ id: `${scope.id}_xWconf` });
+
           Object.entries(scope).forEach(([prop, opts]: [string, any]) => {
             if (groups[key] && prop === 'bbox') {
               const config = groups[key].bbox;
@@ -298,12 +308,31 @@ class DocView {
                 });
 
                 group.add(box);
+
+                // render confidence layer
+                if (key === 'words') {
+                  const optionsConf: ShapeConfig = {
+                    ...bboxToKonvaRect(scope.bbox),
+                    ...config.common,
+                    // @ts-ignore
+                    fill: this.confidenceColor(scope.xWconf),
+                    opacity: 1,
+                  };
+
+                  const confBox = new Konva.Rect(optionsConf);
+                  confBox.globalCompositeOperation('multiply');
+                  xWconfGroup.add(confBox);
+                }
               }
             }
           });
-
+          // order matters!
+          parent.add(xWconfGroup);
           parent.add(group);
           this._refs[key].push(group);
+          if (key === 'words') {
+            this._refs.xWconfs.push(xWconfGroup);
+          }
         });
       };
 
