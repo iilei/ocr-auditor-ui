@@ -181,6 +181,7 @@ class DocView {
     });
   };
 
+  // TODO: range-based color ranges
   confidenceColor = (confidence: number) => colorBetween('rgb(255,96,0)', 'rgb(37,255,0)', confidence * 0.01, 'rgb');
 
   tabSelect = (reverse = false) => {
@@ -318,6 +319,12 @@ class DocView {
                     fill: this.confidenceColor(scope.xWconf),
                     opacity: 1,
                   };
+
+                  // @ts-ignore
+                  if (scope.xWconf) {
+                    // @ts-ignore
+                    optionsConf.name = `${scope.xWconf ? scope.xWconf : ''}`;
+                  }
 
                   const confBox = new Konva.Rect(optionsConf);
                   confBox.globalCompositeOperation('multiply');
