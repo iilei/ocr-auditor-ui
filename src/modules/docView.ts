@@ -142,6 +142,7 @@ class DocView {
   _sticky: Konva.Group | null;
   _ready: boolean;
   _delay: number;
+  _colorStops: Array<[number, string, string]>;
   _refs: Record<ScopeKeys | 'xWconfs', Array<Konva.Group>>;
   state: Record<string, any>;
 
@@ -159,6 +160,11 @@ class DocView {
     const group = new Konva.Group({ name: 'img' });
     this._layers.root.add(group);
     this._img = group;
+    this._colorStops = [
+      [30, 'rgb(255,0,233)', 'rgb(255,96,0)'],
+      [90, 'rgb(255,96,0)', 'rgb(255,253,0)'],
+      [100, 'rgb(255,253,0)', 'rgb(0,168,30)'],
+    ];
     this._refs = {
       careas: [],
       pars: [],
@@ -181,8 +187,24 @@ class DocView {
     });
   };
 
+  colorStops = (confidence: number): [string, string] => {
+    return (
+      this._colorStops
+        // @ts-ignore
+        .map<[string, string]>(([max, start, stop], idx) => {
+          if (
+            confidence <= max &&
+            (idx == 0 || (this._colorStops[idx - 1] && this._colorStops[idx - 1][0] < confidence))
+          ) {
+            return [start, stop];
+          }
+        })
+        .find(Boolean)
+    );
+  };
+
   // TODO: range-based color ranges
-  confidenceColor = (confidence: number) => colorBetween('rgb(255,96,0)', 'rgb(37,255,0)', confidence * 0.01, 'rgb');
+  confidenceColor = (confidence: number) => colorBetween(...this.colorStops(confidence), confidence * 0.01, 'rgb');
 
   tabSelect = (reverse = false) => {
     let nextStickyIndex;
@@ -317,7 +339,7 @@ class DocView {
                     ...config.common,
                     // @ts-ignore
                     fill: this.confidenceColor(scope.xWconf),
-                    opacity: 1,
+                    opacity: 0.5,
                   };
 
                   // @ts-ignore
