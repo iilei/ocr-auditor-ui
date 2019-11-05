@@ -4,11 +4,10 @@ import DocLoader from './docLoader';
 import { traverseFactory, bboxToKonvaRect } from '../modules';
 import { Group } from 'konva/types/Group';
 import { ShapeConfig } from 'konva/types/Shape';
-// import { KonvaNodeComponent } from 'react-konva';
-// import { KonvaEventObject } from 'konva/types/Node';
-
 // @ts-ignore
 import colorBetween from 'color-between';
+
+const MIN_THICKNESS = 4;
 
 // TODO how to get this dry?
 const scopeKeys = ['careas', 'pars', 'lines', 'words'];
@@ -109,7 +108,7 @@ const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
         strokeWidth: 0,
         opacity: 0,
         lineJoin: 'round',
-        cornerRadius: 3,
+        cornerRadius: 1,
         hitStrokeWidth: 16,
       },
       temporary: {
@@ -210,8 +209,24 @@ class DocView {
     );
   };
 
-  // TODO: range-based color ranges
   confidenceColor = (confidence: number) => colorBetween(...this.colorStops(confidence), confidence * 0.01, 'rgb');
+
+  snappyBox = (bondary: any, unbound: any, factor: number, outset: number = 0) => {
+    const { height: bHeight, y: bY } = bondary;
+    const height = Math.max(Math.ceil(bHeight * factor), MIN_THICKNESS);
+    const y = bHeight + bY - height;
+    const [lb, rt] = unbound;
+    const [x0] = lb;
+    const [x1] = rt;
+    const width = x1 - x0;
+    const x = x0;
+    return {
+      height,
+      width,
+      x,
+      y: Math.ceil(y + outset * height),
+    };
+  };
 
   tabSelect = (reverse = false) => {
     let nextStickyIndex;
@@ -283,6 +298,14 @@ class DocView {
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
     this._stage.add(this._layers.root);
 
+    const possiblySnappyBox = (parentClientRect: any, bbox: ScopePaint['bbox'], key: string) => {
+      if (key === 'words') {
+        return this.snappyBox(parentClientRect, bbox, 1, 0);
+      } else {
+        return bboxToKonvaRect(bbox);
+      }
+    };
+
     let timeout = setTimeout(() => {}, 0);
 
     // TODO make private and rename
@@ -290,17 +313,18 @@ class DocView {
       const operation = (view: ScopeBranch, [key, val]: [ScopeKeys, Array<ScopeBranch & ScopePaint>]) => {
         const parent: Group = this._stage.findOne(`#${view.id}`);
         const confParent: Group = this._stage.findOne(`#${view.id}_xWconf`);
+        const parentClientRect = parent.getClientRect({});
 
         val.forEach(scope => {
           const group = new Konva.Group({ id: scope.id, name: scope.content });
-          const xWconfGroup = new Konva.Group({ id: `${scope.id}_xWconf` });
+          const xWconfGroup = new Konva.Group({ id: `${scope.id}_xWconf`, name: key });
 
           Object.entries(scope).forEach(([prop, opts]: [string, any]) => {
             if (groups[key] && prop === 'bbox') {
               const config = groups[key].bbox;
               if (typeof config === 'object') {
                 const options: ShapeConfig = {
-                  ...bboxToKonvaRect(scope.bbox),
+                  ...possiblySnappyBox(parentClientRect, scope.bbox, key),
                   ...config.common,
                 };
                 const box = new Konva.Rect(options);
@@ -342,9 +366,9 @@ class DocView {
                 // render confidence layer
                 if (key === 'words') {
                   const optionsConf: ShapeConfig = {
-                    ...bboxToKonvaRect(scope.bbox),
+                    ...this.snappyBox(parentClientRect, scope.bbox, 0.2, 0.3),
                     ...config.common,
-                    // @ts-ignore
+                    // @ts-ignoreparentClientRect
                     fill: this.confidenceColor(scope.xWconf),
                     opacity: 0.5,
                   };
