@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { Normalize } from '@smooth-ui/core-sc';
 
 import SplitView from './SplitView';
 import Toolbar from './Toolbar';
@@ -44,6 +45,12 @@ const customConf = {
   },
 };
 
+const theme = {
+  colors: {
+    primary: '#2275a8',
+  },
+};
+
 const GlobalStyle = createGlobalStyle`
   html {
     height: 100%;
@@ -80,8 +87,9 @@ const StyledSplitView = styled(SplitView)`
 const App: React.FC = () => {
   return (
     <Router>
-      <ThemeProvider theme={{ awesomegrid: customConf }}>
+      <ThemeProvider theme={{ awesomegrid: customConf, ...theme }}>
         <React.Fragment>
+          <Normalize />
           <Route exact path="/">
             <Redirect to="/doc/phototest/1/" />
           </Route>

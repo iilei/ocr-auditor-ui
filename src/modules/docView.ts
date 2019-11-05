@@ -4,8 +4,8 @@ import DocLoader from './docLoader';
 import { traverseFactory, bboxToKonvaRect } from '../modules';
 import { Group } from 'konva/types/Group';
 import { ShapeConfig } from 'konva/types/Shape';
-import { KonvaNodeComponent } from 'react-konva';
-import { KonvaEventObject } from 'konva/types/Node';
+// import { KonvaNodeComponent } from 'react-konva';
+// import { KonvaEventObject } from 'konva/types/Node';
 
 // @ts-ignore
 import colorBetween from 'color-between';
@@ -161,9 +161,9 @@ class DocView {
     this._layers.root.add(group);
     this._img = group;
     this._colorStops = [
-      [30, 'rgb(255,0,233)', 'rgb(255,96,0)'],
-      [90, 'rgb(255,96,0)', 'rgb(255,253,0)'],
-      [100, 'rgb(255,253,0)', 'rgb(0,168,30)'],
+      // [30, 'rgb(255,0,233)', 'rgb(255,96,0)'],
+      // [90, 'rgb(255,96,0)', 'rgb(255,253,0)'],
+      [100, 'rgb(255,28,0)', 'rgb(64,168,0)'],
     ];
     this._refs = {
       careas: [],
@@ -179,12 +179,19 @@ class DocView {
   init = () => {
     this._layers.root.clear();
 
-    return this.loadImage().then(dimensions => {
+    return this.loadImage().then((dimensions: { width: number; height: number }) => {
       this.walkThrough();
       this.keyLog();
       this._ready = true;
       return dimensions;
     });
+  };
+
+  layers = async ({ confidence }: { confidence: boolean }) => {
+    const confidenceLayer: Group = this._stage.findOne(`#${this._view.id}_xWconf`);
+    confidenceLayer.visible(confidence);
+    this._layers.root.batchDraw();
+    return confidence;
   };
 
   colorStops = (confidence: number): [string, string] => {
@@ -356,7 +363,7 @@ class DocView {
             }
           });
           // order matters!
-          parent.add(xWconfGroup);
+          confParent.add(xWconfGroup);
           parent.add(group);
           this._refs[key].push(group);
           if (key === 'words') {

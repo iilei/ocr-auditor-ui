@@ -72,7 +72,7 @@
                       ],
                       "content": "This",
                       "id": "word_1_1",
-                      "xWconf": 91
+                      "xWconf": 0
                     },
                     {
                       "bbox": [
@@ -87,7 +87,7 @@
                       ],
                       "content": "is",
                       "id": "word_1_2",
-                      "xWconf": 92
+                      "xWconf": 5
                     },
                     {
                       "bbox": [
@@ -102,7 +102,7 @@
                       ],
                       "content": "a",
                       "id": "word_1_3",
-                      "xWconf": 92
+                      "xWconf": 10
                     },
                     {
                       "bbox": [
@@ -117,7 +117,7 @@
                       ],
                       "content": "lot",
                       "id": "word_1_4",
-                      "xWconf": 90
+                      "xWconf": 15
                     },
                     {
                       "bbox": [
@@ -132,7 +132,7 @@
                       ],
                       "content": "of",
                       "id": "word_1_5",
-                      "xWconf": 60
+                      "xWconf": 20
                     },
                     {
                       "bbox": [
@@ -147,7 +147,7 @@
                       ],
                       "content": "12",
                       "id": "word_1_6",
-                      "xWconf": 93
+                      "xWconf": 25
                     },
                     {
                       "bbox": [
@@ -162,7 +162,7 @@
                       ],
                       "content": "point",
                       "id": "word_1_7",
-                      "xWconf": 90
+                      "xWconf": 30
                     },
                     {
                       "bbox": [
@@ -177,7 +177,7 @@
                       ],
                       "content": "text",
                       "id": "word_1_8",
-                      "xWconf": 93
+                      "xWconf": 35
                     },
                     {
                       "bbox": [
@@ -192,7 +192,7 @@
                       ],
                       "content": "to",
                       "id": "word_1_9",
-                      "xWconf": 92
+                      "xWconf": 40
                     },
                     {
                       "bbox": [
@@ -207,7 +207,7 @@
                       ],
                       "content": "test",
                       "id": "word_1_10",
-                      "xWconf": 92
+                      "xWconf": 45
                     },
                     {
                       "bbox": [
@@ -222,7 +222,7 @@
                       ],
                       "content": "the",
                       "id": "word_1_11",
-                      "xWconf": 92
+                      "xWconf": 50
                     }
                   ],
                   "xAscenders": 6,
@@ -259,7 +259,7 @@
                       ],
                       "content": "ocr",
                       "id": "word_1_12",
-                      "xWconf": 90
+                      "xWconf": 55
                     },
                     {
                       "bbox": [
@@ -274,7 +274,7 @@
                       ],
                       "content": "code",
                       "id": "word_1_13",
-                      "xWconf": 91
+                      "xWconf": 60
                     },
                     {
                       "bbox": [
@@ -289,7 +289,7 @@
                       ],
                       "content": "and",
                       "id": "word_1_14",
-                      "xWconf": 90
+                      "xWconf": 65
                     },
                     {
                       "bbox": [
@@ -304,7 +304,7 @@
                       ],
                       "content": "see",
                       "id": "word_1_15",
-                      "xWconf": 91
+                      "xWconf": 70
                     },
                     {
                       "bbox": [
@@ -319,7 +319,7 @@
                       ],
                       "content": "if",
                       "id": "word_1_16",
-                      "xWconf": 92
+                      "xWconf": 75
                     },
                     {
                       "bbox": [
@@ -334,7 +334,7 @@
                       ],
                       "content": "it",
                       "id": "word_1_17",
-                      "xWconf": 92
+                      "xWconf": 80
                     },
                     {
                       "bbox": [
@@ -349,7 +349,7 @@
                       ],
                       "content": "works",
                       "id": "word_1_18",
-                      "xWconf": 92
+                      "xWconf": 90
                     },
                     {
                       "bbox": [
@@ -364,7 +364,7 @@
                       ],
                       "content": "on",
                       "id": "word_1_19",
-                      "xWconf": 87
+                      "xWconf": 95
                     },
                     {
                       "bbox": [
@@ -379,7 +379,7 @@
                       ],
                       "content": "all",
                       "id": "word_1_20",
-                      "xWconf": 87
+                      "xWconf": 100
                     },
                     {
                       "bbox": [
@@ -394,7 +394,7 @@
                       ],
                       "content": "types",
                       "id": "word_1_21",
-                      "xWconf": 92
+                      "xWconf": 100
                     }
                   ],
                   "xAscenders": 6,
@@ -431,7 +431,7 @@
                       ],
                       "content": "of",
                       "id": "word_1_22",
-                      "xWconf": 92
+                      "xWconf": 100
                     },
                     {
                       "bbox": [

@@ -1,4 +1,5 @@
-import React, { createRef, Component } from 'react';
+import React, { createRef, Component, Fragment } from 'react';
+import { Switch, FormCheck, FormCheckLabel } from '@smooth-ui/core-sc';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { Stage } from 'react-konva';
@@ -21,10 +22,12 @@ interface Cancelable {
 class HocrView extends Component<PropsType> {
   readonly stageRef = createRef<Stage>();
   readonly docLoader: DocLoader;
+  docView: DocView | undefined;
 
   state = {
     width: 0,
     height: 0,
+    showConfidence: true,
   };
   updateDimensionsThrottled: any;
 
@@ -44,8 +47,8 @@ class HocrView extends Component<PropsType> {
     if (node) {
       this.docLoader.get().then(
         async view => {
-          const docView = new DocView(node.getStage(), this.docLoader);
-          const { width, height } = await docView.init();
+          this.docView = new DocView(node.getStage(), this.docLoader);
+          const { width, height } = await this.docView.init();
           //          const hash = document.location.hash.replace(/^#?/, '')
           // docView.highlightById('par_1_2');
           this.setState({ width, height });
@@ -61,9 +64,35 @@ class HocrView extends Component<PropsType> {
     console.log(event.target.getParent().attrs.name);
   };
 
+  toggleConfidenceVisibility = async (event: React.FormEvent<HTMLInputElement>) => {
+    // @ts-ignore
+    const showConfidence = !Boolean(parseInt(event.target.value || 0, 10));
+    if (this.docView) {
+      await this.docView.layers({ confidence: showConfidence });
+    }
+    this.setState({ showConfidence });
+  };
+
   render() {
-    const { width, height } = this.state;
-    return <Stage tabIndex={1} ref={this.stageRef} width={width} height={height} onDblClick={this.handleDoubleClick} />;
+    const { width, height, showConfidence } = this.state;
+    console.log(showConfidence);
+    return (
+      <Fragment>
+        <Stage tabIndex={1} ref={this.stageRef} width={width} height={height} onDblClick={this.handleDoubleClick} />
+        <FormCheck>
+          <Switch
+            name="confidence"
+            scale="sm"
+            tabIndex={1}
+            checked={showConfidence}
+            onChange={this.toggleConfidenceVisibility}
+            value={Number(showConfidence)}
+          />
+          {/* TODO hover Style */}
+          <FormCheckLabel name="confidence">Confidence</FormCheckLabel>
+        </FormCheck>
+      </Fragment>
+    );
   }
 }
 
