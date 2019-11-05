@@ -73,8 +73,13 @@ class HocrView extends Component<PropsType> {
     this.setState({ showConfidence });
   };
 
+  toggleSticky = () => {
+    return 0;
+  };
+
   render() {
     const { width, height, showConfidence } = this.state;
+    const sticky = true;
     console.log(showConfidence);
     return (
       <Fragment>
@@ -90,6 +95,19 @@ class HocrView extends Component<PropsType> {
           />
           {/* TODO hover Style */}
           <FormCheckLabel name="confidence">Confidence</FormCheckLabel>
+        </FormCheck>
+        <FormCheck>
+          <Switch
+            name="sticky"
+            scale="sm"
+            tabIndex={1}
+            checked={sticky}
+            onChange={this.toggleSticky}
+            value={Number(sticky)}
+            disabled
+          />
+          {/* TODO hover Style */}
+          <FormCheckLabel name="sticky">Sticky</FormCheckLabel>
         </FormCheck>
       </Fragment>
     );

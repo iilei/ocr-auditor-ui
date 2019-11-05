@@ -8,6 +8,7 @@ import { ShapeConfig } from 'konva/types/Shape';
 import colorBetween from 'color-between';
 
 const MIN_THICKNESS = 4;
+const SNAP_FACTOR = 4;
 
 // TODO how to get this dry?
 const scopeKeys = ['careas', 'pars', 'lines', 'words'];
@@ -213,7 +214,7 @@ class DocView {
 
   snappyBox = (bondary: any, unbound: any, factor: number, outset: number = 0) => {
     const { height: bHeight, y: bY } = bondary;
-    const height = Math.max(Math.ceil(bHeight * factor), MIN_THICKNESS);
+    const height = Math.ceil(Math.max(Math.ceil(bHeight * factor), MIN_THICKNESS) / SNAP_FACTOR) * SNAP_FACTOR;
     const y = bHeight + bY - height;
     const [lb, rt] = unbound;
     const [x0] = lb;

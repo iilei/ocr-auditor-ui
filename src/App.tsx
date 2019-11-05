@@ -47,7 +47,7 @@ const customConf = {
 
 const theme = {
   colors: {
-    primary: '#2275a8',
+    primary: '#0082b2',
   },
 };
 
