@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@smooth-ui/core-sc": "^11.1.1",
+    "@types/fontfaceobserver": "0.0.6",
     "@types/jest": "^24.0.19",
     "@types/lodash": "^4.14.144",
     "@types/react": "^16.9.9",
@@ -11,6 +12,9 @@
     "@types/react-router-dom": "^5.1.0",
     "@types/superagent": "^4.1.3",
     "color-between": "^1.0.2",
+    "dotenv": "^8.2.0",
+    "font-picker-react": "^3.4.0",
+    "fontfaceobserver": "^2.1.0",
     "konva": "^4.0.16",
     "lodash": "^4.17.15",
     "react": "^16.11.0",
@@ -37,7 +41,7 @@
     "start": "rescripts start",
     "build": "rescripts build",
     "test": "rescripts test",
-    "fmt": "eslint --fix \"src/**/*.{j,t}{s,sx}\" && prettier --write \"src/**/*.{j,t}{s,sx}\""
+    "fmt": "eslint --fix \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" && prettier --write \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" "
   },
   "eslintConfig": {
     "extends": "react-app"

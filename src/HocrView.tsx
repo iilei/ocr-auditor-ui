@@ -1,10 +1,21 @@
 import React, { createRef, Component, Fragment } from 'react';
-import { Switch, FormCheck, FormCheckLabel } from '@smooth-ui/core-sc';
+import { Switch, FormCheck, FormCheckLabel, Box, Select } from '@smooth-ui/core-sc';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import { Stage } from 'react-konva';
-import { DocLoader, DocView } from './modules';
 import { KonvaEventObject } from 'konva/types/Node';
+import FontPicker from 'font-picker-react';
+import { Category, Variant } from '@samuelmeuli/font-manager';
+import FontFaceObserver from 'fontfaceobserver';
+
+import { DocLoader, DocView } from './modules';
+
+const { FONT_FAMILIES } = process.env;
+const fontFamiliyStrings: Array<string> = (FONT_FAMILIES || '').split('|').map(str => str.replace(/\+/g, ' '));
+console.log(fontFamiliyStrings);
+const fontFamilies = fontFamiliyStrings;
+
+const categories: Array<Category> = ['sans-serif', 'serif', 'display', 'monospace', 'handwriting'];
 
 // Type whatever you expect in 'this.props.match.params.*'
 type PathParamsType = {
@@ -27,6 +38,7 @@ class HocrView extends Component<PropsType> {
   state = {
     width: 0,
     height: 0,
+    activeFontFamily: 'Open Sans',
     showConfidence: true,
   };
   updateDimensionsThrottled: any;
@@ -81,34 +93,60 @@ class HocrView extends Component<PropsType> {
     const { width, height, showConfidence } = this.state;
     const sticky = true;
     console.log(showConfidence);
+
     return (
       <Fragment>
         <Stage tabIndex={1} ref={this.stageRef} width={width} height={height} onDblClick={this.handleDoubleClick} />
-        <FormCheck>
-          <Switch
-            name="confidence"
-            scale="sm"
-            tabIndex={1}
-            checked={showConfidence}
-            onChange={this.toggleConfidenceVisibility}
-            value={Number(showConfidence)}
-          />
-          {/* TODO hover Style */}
-          <FormCheckLabel name="confidence">Confidence</FormCheckLabel>
-        </FormCheck>
-        <FormCheck>
-          <Switch
-            name="sticky"
-            scale="sm"
-            tabIndex={1}
-            checked={sticky}
-            onChange={this.toggleSticky}
-            value={Number(sticky)}
-            disabled
-          />
-          {/* TODO hover Style */}
-          <FormCheckLabel name="sticky">Sticky</FormCheckLabel>
-        </FormCheck>
+        <Box p={4}>
+          <FormCheck>
+            <Switch
+              name="confidence"
+              scale="sm"
+              tabIndex={1}
+              checked={showConfidence}
+              onChange={this.toggleConfidenceVisibility}
+              value={Number(showConfidence)}
+            />
+            {/* TODO hover Style */}
+            <FormCheckLabel name="confidence">Confidence</FormCheckLabel>
+          </FormCheck>
+          <FormCheck>
+            <Switch
+              name="sticky"
+              scale="sm"
+              tabIndex={1}
+              checked={sticky}
+              onChange={this.toggleSticky}
+              value={Number(sticky)}
+              disabled
+            />
+            {/* TODO hover Style */}
+            <FormCheckLabel name="sticky">Sticky</FormCheckLabel>
+          </FormCheck>
+          <Box>
+            <FontPicker
+              apiKey={process.env.GOOGLE_API_KEY || ''}
+              families={fontFamilies}
+              activeFontFamily={this.state.activeFontFamily}
+              onChange={nextFont => {
+                const font = new FontFaceObserver(nextFont.family);
+                font
+                  .load()
+                  .then(() => {
+                    if (this.docView) {
+                      this.docView.setFont(nextFont);
+                    }
+                    this.setState({
+                      activeFontFamily: nextFont.family,
+                    });
+                  })
+                  .catch(() => {
+                    console.log(nextFont.family + 'failed to load.');
+                  });
+              }}
+            />
+          </Box>
+        </Box>
       </Fragment>
     );
   }

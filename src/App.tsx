@@ -77,6 +77,23 @@ const GlobalStyle = createGlobalStyle`
   code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
   }
+  #root div[id^=font-picker] .dropdown-button {
+    background: #fff
+  }
+  #root div[id^=font-picker] ul {
+    background: #fff;
+  }
+  #root div[id^=font-picker] ul li button.active-font {
+    background: #fff;
+  }
+  #root div[id^=font-picker] ul li button:hover,
+  #root div[id^=font-picker] ul li button:focus {
+    background: #99e3ff;
+  }
+  
+  #root div[id^=font-picker] .dropdown-icon.finished::before {
+    border-top: 6px solid #0082b2;
+  }
 `;
 
 const StyledSplitView = styled(SplitView)`

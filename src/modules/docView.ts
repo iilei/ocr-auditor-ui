@@ -26,6 +26,11 @@ type DocMeta = {
   ocrSystem: string;
 };
 
+type FontObj = {
+  family: string;
+  variants: Array<string>;
+};
+
 type ScopeBranch = {
   [K in ScopeKeys]?: Array<Scope>;
 } &
@@ -134,6 +139,7 @@ export type ImgMeta = {
 const blankNode = new Konva.Rect({ visible: false });
 
 class DocView {
+  _font: FontObj;
   _view: Record<string, any>;
   _stage: Konva.Stage;
   _layers: Record<'root', Konva.Layer>;
@@ -156,6 +162,7 @@ class DocView {
     this._sticky = null;
     this._ready = false;
     this._delay = 75;
+    this._font = { family: 'Verdana', variants: ['regular'] };
     this.state = { assumeSecondClick: true };
     const group = new Konva.Group({ name: 'img' });
     this._layers.root.add(group);
@@ -185,6 +192,13 @@ class DocView {
       this._ready = true;
       return dimensions;
     });
+  };
+
+  setFont = (font: FontObj) => {
+    this._font = font;
+    const { family } = font;
+    const [variant] = font.variants;
+    console.log(variant, family);
   };
 
   layers = async ({ confidence }: { confidence: boolean }) => {
@@ -398,6 +412,14 @@ class DocView {
       };
 
       traverseFactory(this._view, operation, key);
+    });
+
+    this._layers.root.on('click', () => {
+      this._node = blankNode;
+      if (this._sticky) {
+        this._sticky.setAttrs({ opacity: 0 });
+      }
+      this._layers.root.batchDraw();
     });
 
     this._layers.root.draw();
