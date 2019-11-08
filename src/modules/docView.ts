@@ -149,7 +149,7 @@ class DocView {
   _ready: boolean;
   _delay: number;
   _colorStops: Array<[number, string, string]>;
-  _refs: Record<ScopeKeys | 'xWconfs', Array<Konva.Group>>;
+  _refs: Record<ScopeKeys | 'xWconfs' | '_texts', Array<Konva.Group>>;
   state: Record<string, any>;
 
   constructor(stageNode: Konva.Stage, doc: DocLoader) {
@@ -166,6 +166,7 @@ class DocView {
     this.state = { assumeSecondClick: true };
     const group = new Konva.Group({ name: 'img' });
     this._layers.root.add(group);
+    this._stage.add(this._layers.root);
     this._img = group;
     this._colorStops = [
       // [30, 'rgb(255,0,233)', 'rgb(255,96,0)'],
@@ -178,6 +179,7 @@ class DocView {
       lines: [],
       words: [],
       xWconfs: [],
+      _texts: [],
     };
 
     return this;
@@ -198,7 +200,21 @@ class DocView {
     this._font = font;
     const { family } = font;
     const [variant] = font.variants;
-    console.log(variant, family);
+
+    var layer = new Konva.Layer();
+    this._stage.add(layer);
+    var text = new Konva.Text({
+      x: 50,
+      y: 50,
+      fontSize: 25,
+      text: 'A text with custom font.',
+      width: 250,
+    });
+
+    text.fontFamily(family);
+
+    layer.add(text);
+    layer.draw();
   };
 
   layers = async ({ confidence }: { confidence: boolean }) => {
@@ -310,8 +326,8 @@ class DocView {
 
   walkThrough = () => {
     this._layers.root.add(new Konva.Group({ id: `${this._view.id}_xWconf` }));
+    this._layers.root.add(new Konva.Group({ id: `${this._view.id}_text` }));
     this._layers.root.add(new Konva.Group({ id: this._view.id }));
-    this._stage.add(this._layers.root);
 
     const possiblySnappyBox = (parentClientRect: any, bbox: ScopePaint['bbox'], key: string) => {
       if (key === 'words') {
@@ -328,11 +344,13 @@ class DocView {
       const operation = (view: ScopeBranch, [key, val]: [ScopeKeys, Array<ScopeBranch & ScopePaint>]) => {
         const parent: Group = this._stage.findOne(`#${view.id}`);
         const confParent: Group = this._stage.findOne(`#${view.id}_xWconf`);
+        const textParent: Group = this._stage.findOne(`#${view.id}_text`);
         const parentClientRect = parent.getClientRect({});
 
         val.forEach(scope => {
           const group = new Konva.Group({ id: scope.id, name: scope.content });
           const xWconfGroup = new Konva.Group({ id: `${scope.id}_xWconf`, name: key });
+          const textGroup = new Konva.Group({ id: `${scope.id}_text`, name: key });
 
           Object.entries(scope).forEach(([prop, opts]: [string, any]) => {
             if (groups[key] && prop === 'bbox') {
@@ -378,8 +396,8 @@ class DocView {
 
                 group.add(box);
 
-                // render confidence layer
                 if (key === 'words') {
+                  // render confidence layer
                   const optionsConf: ShapeConfig = {
                     ...this.snappyBox(parentClientRect, scope.bbox, 0.2, 0.3),
                     ...config.common,
@@ -397,15 +415,37 @@ class DocView {
                   const confBox = new Konva.Rect(optionsConf);
                   confBox.globalCompositeOperation('multiply');
                   xWconfGroup.add(confBox);
+
+                  ///////////////////////////////////////////////////////////////////
+                  // render text layer
+                  const textOptions: ShapeConfig = {
+                    ...possiblySnappyBox(parentClientRect, scope.bbox, key),
+                    ...config.common,
+                    opacity: 1,
+                    fill: '#fff',
+                  };
+
+                  textGroup.add(new Konva.Rect(textOptions));
+                  textGroup.add(
+                    new Konva.Text({
+                      ...textOptions,
+                      text: scope.content || '',
+                      fontSize: 26,
+                      opacity: 1,
+                      fill: '#000',
+                    }),
+                  );
                 }
               }
             }
           });
           // order matters!
+          textParent.add(textGroup);
           confParent.add(xWconfGroup);
           parent.add(group);
           this._refs[key].push(group);
           if (key === 'words') {
+            this._refs._texts.push(textGroup);
             this._refs.xWconfs.push(xWconfGroup);
           }
         });

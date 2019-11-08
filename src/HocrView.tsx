@@ -38,7 +38,7 @@ class HocrView extends Component<PropsType> {
   state = {
     width: 0,
     height: 0,
-    activeFontFamily: 'Open Sans',
+    activeFontFamily: '',
     showConfidence: true,
   };
   updateDimensionsThrottled: any;

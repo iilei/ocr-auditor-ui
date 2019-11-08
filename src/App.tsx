@@ -108,7 +108,7 @@ const App: React.FC = () => {
         <React.Fragment>
           <Normalize />
           <Route exact path="/">
-            <Redirect to="/doc/phototest/1/" />
+            <Redirect to="/doc/phototest/" />
           </Route>
           <Route path="/doc/:id/:page?">
             <React.Fragment>
