@@ -47,7 +47,6 @@ class HocrView extends Component<Props> {
     activeFontFamily: '',
     showConfidence: true,
   };
-  updateDimensionsThrottled: any;
 
   constructor(props: Props) {
     super(props);
@@ -90,8 +89,8 @@ class HocrView extends Component<Props> {
   }
 
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
-    const id = event.target.getParent().getId();
-    const name = event.target.getParent().attrs.name;
+    // const id = event.target.getParent().getId();
+    // const name = event.target.getParent().attrs.name;
     this.onTokenFocus(event);
   };
 
