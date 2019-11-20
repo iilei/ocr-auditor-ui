@@ -82,8 +82,6 @@ class HocrView extends Component<Props> {
           this.docView = new DocView(node.getStage(), this.docLoader);
           const { width, height } = await this.docView.init();
 
-          // const hash = document.location.hash.replace(/^#?/, '')
-          // docView.highlightById('par_1_2');
           this.setState({ width, height });
         },
         error => {},
