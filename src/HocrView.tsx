@@ -3,6 +3,8 @@ import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { DocLoader, DocView } from './modules';
+import { Plugin, Dimensions } from './modules/types/docView';
+
 import Konva from 'konva';
 
 export interface KeyboardEvents {
@@ -20,6 +22,7 @@ export interface TokenFocusEvent {
 export interface Props extends KonvaNodeEvents, StageProps, KeyboardEvents, LoadEvent, TokenFocusEvent {
   id: string;
   page?: number | string;
+  plugins?: Array<Plugin>;
 }
 
 export interface OCRPayload {
@@ -40,6 +43,7 @@ class HocrView extends Component<Props> {
   onKeyPress: Function;
   onLoad: Function;
   onTokenFocus: Function;
+  plugins: Array<Plugin>;
 
   state = {
     width: 0,
@@ -56,6 +60,7 @@ class HocrView extends Component<Props> {
     const {
       id,
       page = 1,
+      plugins = [],
       onClick = noop,
       onKeyPress = noop,
       onDblClick = noop,
@@ -70,6 +75,7 @@ class HocrView extends Component<Props> {
     this.onTokenFocus = onTokenFocus;
     this.docLoader = new DocLoader(`/${id}.json`, String(page));
     this.stageRef = { current: null };
+    this.plugins = plugins;
   }
 
   componentDidMount() {
@@ -78,15 +84,19 @@ class HocrView extends Component<Props> {
     if (node) {
       this.docLoader.get().then(
         async view => {
-          this.docView = new DocView(node.getStage(), this.docLoader);
-          const { width, height } = await this.docView.init();
-
-          this.setState({ width, height });
+          this.docView = new DocView({ stageNode: node.getStage(), doc: this.docLoader, plugins: this.plugins });
+          await this.docView.init();
+          const image: Konva.Image = this.docView.image;
+          this.resize({ height: image.getHeight(), width: image.getWidth() });
         },
         error => {},
       );
     }
   }
+
+  resize = ({ width, height }: Dimensions) => {
+    this.setState({ width, height });
+  };
 
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
     // const id = event.target.getParent().getId();

@@ -9,10 +9,6 @@ export default {
   parameters: { notes: componentNotes },
 };
 
-const eventsFromObject = actions({ onTokenFocus: 'TokenFocus', onLoad: 'Load' });
+const eventsFromObject = actions('onLoad', 'onTokenFocus');
 
-export const phototestPage1 = () => (
-  <HocrView {...eventsFromObject} id="phototest" page="1">
-    Hello Button
-  </HocrView>
-);
+export const phototestPage1 = () => <HocrView {...eventsFromObject} id="phototest" page="1" />;

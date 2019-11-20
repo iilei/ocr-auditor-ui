@@ -46,7 +46,8 @@
     "test": "rescripts test",
     "storybook": "start-storybook -p 9009 -s public",
     "fmt": "eslint --fix \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" && prettier --write \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" ",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "tsc": "tsc --traceResolution"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -65,13 +66,19 @@
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --write",
+      "fmt",
       "git add"
+    ]
+  },
+  "test": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "test"
     ]
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "pre-push": "test --bail"
     }
   },
   "prettier": {
