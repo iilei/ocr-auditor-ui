@@ -9,11 +9,15 @@ export interface KeyboardEvents {
   onKeyPress?(evt: Konva.KonvaEventObject<Event>): void;
 }
 
-export interface LoadEvents {
+export interface LoadEvent {
   onLoad?(evt: Konva.KonvaEventObject<Event>): void;
 }
 
-export interface Props extends KonvaNodeEvents, StageProps, KeyboardEvents, LoadEvents {
+export interface TokenFocusEvent {
+  onTokenFocus?(evt: Konva.KonvaEventObject<Event>): void;
+}
+
+export interface Props extends KonvaNodeEvents, StageProps, KeyboardEvents, LoadEvent, TokenFocusEvent {
   id: string;
   page?: number | string;
 }
@@ -35,6 +39,7 @@ class HocrView extends Component<Props> {
   onClick: Function;
   onKeyPress: Function;
   onLoad: Function;
+  onTokenFocus: Function;
 
   state = {
     width: 0,
@@ -49,12 +54,21 @@ class HocrView extends Component<Props> {
 
     const noop = (): any => null;
 
-    const { id, page = 1, onClick = noop, onKeyPress = noop, onDblClick = noop, onLoad = noop } = props;
+    const {
+      id,
+      page = 1,
+      onClick = noop,
+      onKeyPress = noop,
+      onDblClick = noop,
+      onLoad = noop,
+      onTokenFocus = noop,
+    } = props;
 
     this.onDblClick = onDblClick;
     this.onClick = onClick;
     this.onKeyPress = onKeyPress;
     this.onLoad = onLoad;
+    this.onTokenFocus = onTokenFocus;
     this.docLoader = new DocLoader(`/${id}.json`, String(page));
     this.stageRef = { current: null };
   }
@@ -80,7 +94,7 @@ class HocrView extends Component<Props> {
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
     const id = event.target.getParent().getId();
     const name = event.target.getParent().attrs.name;
-    this.onDblClick({ id, name });
+    this.onTokenFocus(event);
   };
 
   handleLoad = (event: KonvaEventObject<Event>) => {
