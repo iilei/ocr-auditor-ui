@@ -133,8 +133,13 @@ const groups: { [k: string]: { bbox: ScopePaint['bbox'] } } = {
 export type ImgMeta = {
   width: number;
   height: number;
-  err: number;
+  image: HTMLImageElement;
+  x: number;
+  y: number;
 };
+/**
+ * imgOpts
+ */
 
 const blankNode = new Konva.Rect({ visible: false });
 
@@ -482,26 +487,24 @@ class DocView {
     const imageObj = new Image();
 
     return new Promise<ImgMeta>((resolve, reject) => {
-      imageObj.onload = () => {
+      imageObj.onload = evt => {
         const { naturalHeight: height, naturalWidth: width } = imageObj;
-        const img = new Konva.Image({
+        const imgOpts = {
           x: 0,
           y: 0,
           image: imageObj,
           width,
           height,
-        });
+        };
+        const img = new Konva.Image(imgOpts);
 
         img.globalCompositeOperation('multiply');
 
         this._img.add(img);
         this._layers.root.draw();
+        img.fire('load', imgOpts, true);
 
-        resolve({
-          height,
-          width,
-          err: 0,
-        });
+        resolve(imgOpts);
       };
 
       imageObj.onerror = () => reject({ width: 0, height: 0, err: 1 });
