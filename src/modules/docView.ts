@@ -1,11 +1,13 @@
 import Konva from 'konva';
-import { Options, Dimensions } from './types/docView';
+import { Plugin, Options, Dimensions } from './types/docView';
+import { sequentially } from '../util';
 
 class DocView {
   _view: Record<'image', string>;
   _stage: Konva.Stage;
   _root: Konva.Layer;
   _img: Konva.Group;
+  _plugins: Array<Plugin>;
 
   constructor({ stageNode, doc, plugins }: Options) {
     const { view } = doc;
@@ -15,15 +17,33 @@ class DocView {
     this._img = new Konva.Group({ id: '_img' });
     this._root.add(this._img);
     this._stage.add(this._root);
+    this._plugins = plugins.filter(plugin => plugin.context === 'canvas');
 
     return this;
   }
 
-  init = () => {
+  init = async () => {
     this.clear();
+    const imgLoader = await this.loadImage(this._view.image);
 
-    return this.loadImage(this._view.image);
+    this.pluginQueue();
+
+    return imgLoader;
   };
+
+  pluginQueue = () => {
+    sequentially(this._plugins.map(plugin => plugin.fn({FOO: 5})));
+  }
+  //
+  // _getSystemBoundPlugins = () => this._plugins.map(
+  //     plugin => {
+  //       const provisioned = new Promise(() => {
+  //         plugin({})
+  //       })
+  //
+  //       return provisioned;
+  //     },
+  //   );
 
   clear = () => {
     this._root.clear();

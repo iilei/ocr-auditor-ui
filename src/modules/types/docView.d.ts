@@ -3,15 +3,12 @@
 import Konva from 'konva';
 import DocLoader from '../docLoader';
 
-export interface PluginSystem {}
-
-export interface PluginSystem {
-  fn: Record<string, (options: Record<string, any>) => void | any>;
+export interface Plugin {
+  context: 'canvas' | 'wrapper';
+  fn: PluginPromiseFactory;
 }
 
-export interface PluginInterface {}
-
-export type Plugin = (config: PluginSystem) => PluginInterface;
+export type PluginPromiseFactory = (options: Record<string, any>) => Promise
 
 export interface Options {
   stageNode: Konva.Stage;

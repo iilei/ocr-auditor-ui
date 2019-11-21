@@ -4,6 +4,7 @@ import { KonvaEventObject } from 'konva/types/Node';
 
 import { DocLoader, DocView } from './modules';
 import { Plugin, Dimensions } from './modules/types/docView';
+import allPlugins from './plugins/all';
 
 import Konva from 'konva';
 
@@ -60,7 +61,7 @@ class HocrView extends Component<Props> {
     const {
       id,
       page = 1,
-      plugins = [],
+      plugins = allPlugins,
       onClick = noop,
       onKeyPress = noop,
       onDblClick = noop,
@@ -86,7 +87,7 @@ class HocrView extends Component<Props> {
         async view => {
           this.docView = new DocView({ stageNode: node.getStage(), doc: this.docLoader, plugins: this.plugins });
           await this.docView.init();
-          const image: Konva.Image = this.docView.image;
+          const image: Konva.Image = this.docView.image!;
           this.resize({ height: image.getHeight(), width: image.getWidth() });
         },
         error => {},
@@ -99,8 +100,6 @@ class HocrView extends Component<Props> {
   };
 
   handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
-    // const id = event.target.getParent().getId();
-    // const name = event.target.getParent().attrs.name;
     this.onTokenFocus(event);
   };
 
