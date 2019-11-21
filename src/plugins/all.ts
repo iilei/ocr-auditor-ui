@@ -1,5 +1,3 @@
-import { wordShapes } from './';
+import { words } from './';
 
-export default [
-  wordShapes
-]
+export default [words];

@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Plugin, Options, Dimensions } from './types/docView';
-import { sequentially } from '../util';
+import { sequentially, traverse, traverseFactory } from '../util';
 
 class DocView {
   _view: Record<'image', string>;
@@ -8,6 +8,13 @@ class DocView {
   _root: Konva.Layer;
   _img: Konva.Group;
   _plugins: Array<Plugin>;
+  state: {
+    plugins: {
+      words: {
+        views: Array<Record<string, any>>;
+      };
+    };
+  };
 
   constructor({ stageNode, doc, plugins }: Options) {
     const { view } = doc;
@@ -18,6 +25,7 @@ class DocView {
     this._root.add(this._img);
     this._stage.add(this._root);
     this._plugins = plugins.filter(plugin => plugin.context === 'canvas');
+    this.state = { plugins: { words: {views: []} } };
 
     return this;
   }
@@ -25,28 +33,37 @@ class DocView {
   init = async () => {
     this.clear();
     const imgLoader = await this.loadImage(this._view.image);
-
-    this.pluginQueue();
+    await this.pluginQueue();
+    this._stage.fire('initialized', this.state, true)
 
     return imgLoader;
   };
 
-  pluginQueue = () => {
-    sequentially(this._plugins.map(plugin => plugin.fn({FOO: 5})));
-  }
-  //
-  // _getSystemBoundPlugins = () => this._plugins.map(
-  //     plugin => {
-  //       const provisioned = new Promise(() => {
-  //         plugin({})
-  //       })
-  //
-  //       return provisioned;
-  //     },
-  //   );
+  pluginQueue = async () => {
+    await sequentially(
+      this._plugins.map(plugin =>
+        plugin.fn({
+          view: this._view,
+          root: this._root,
+          Konva,
+          fn: {
+            traverse,
+            traverseFactory,
+            setState: (state: Record<string, any>) =>
+              this.setState({ plugins: { ...this.state.plugins, [plugin.name]: state } }),
+            getState: () => this.state,
+          },
+        }),
+      ),
+    );
+  };
 
   clear = () => {
     this._root.clear();
+  };
+
+  setState = (state: Record<string, any>) => {
+    Object.assign(this.state, state);
   };
 
   //
@@ -350,7 +367,8 @@ class DocView {
 
         this._img.add(img);
         this._root.batchDraw();
-        img.fire('load', imgOpts, true);
+        this.setState({img: {width, height, url}})
+        img.fire('load', this.state, true);
 
         resolve(imgOpts);
       };
@@ -367,7 +385,7 @@ class DocView {
       return new Konva.Image();
     }
 
-    return img;
+    return img!;
   }
 }
 

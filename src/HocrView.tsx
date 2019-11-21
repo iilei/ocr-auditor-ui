@@ -7,6 +7,7 @@ import { Plugin, Dimensions } from './modules/types/docView';
 import allPlugins from './plugins/all';
 
 import Konva from 'konva';
+import { flatten } from 'lodash';
 
 export interface KeyboardEvents {
   onKeyPress?(evt: Konva.KonvaEventObject<Event>): void;
@@ -43,6 +44,7 @@ class HocrView extends Component<Props> {
   onClick: Function;
   onKeyPress: Function;
   onLoad: Function;
+  onInitialized: Function;
   onTokenFocus: Function;
   plugins: Array<Plugin>;
 
@@ -61,12 +63,13 @@ class HocrView extends Component<Props> {
     const {
       id,
       page = 1,
-      plugins = allPlugins,
+      plugins = flatten(allPlugins),
       onClick = noop,
       onKeyPress = noop,
       onDblClick = noop,
       onLoad = noop,
       onTokenFocus = noop,
+      onInitialized = noop,
     } = props;
 
     this.onDblClick = onDblClick;
@@ -74,6 +77,7 @@ class HocrView extends Component<Props> {
     this.onKeyPress = onKeyPress;
     this.onLoad = onLoad;
     this.onTokenFocus = onTokenFocus;
+    this.onInitialized = onInitialized;
     this.docLoader = new DocLoader(`/${id}.json`, String(page));
     this.stageRef = { current: null };
     this.plugins = plugins;
@@ -87,6 +91,7 @@ class HocrView extends Component<Props> {
         async view => {
           this.docView = new DocView({ stageNode: node.getStage(), doc: this.docLoader, plugins: this.plugins });
           await this.docView.init();
+          // TODO: refactor and use onLoad Event handler instead
           const image: Konva.Image = this.docView.image!;
           this.resize({ height: image.getHeight(), width: image.getWidth() });
         },
@@ -107,6 +112,10 @@ class HocrView extends Component<Props> {
     this.onLoad(event);
   };
 
+  handleInitialized = (event: KonvaEventObject<Event>) => {
+    this.onInitialized(event);
+  };
+
   render() {
     const { width, height } = this.state;
 
@@ -118,6 +127,7 @@ class HocrView extends Component<Props> {
         height={height}
         onDblClick={this.handleDoubleClick}
         onLoad={this.handleLoad}
+        onInitialized={this.handleInitialized}
       />
     );
   }

@@ -3,7 +3,11 @@ const traverseFactory = (obj, operation, ...cast) => {
 
   const traverseFunc = _obj => {
     Object.entries(_obj).forEach(([key, val]) => {
-      if (typeof val === 'object') {
+      if (cast.includes(`${key}[*]`) && Array.isArray(val)) {
+        _obj[key] = val.map((__obj, __index) => {
+          return operation(__obj, [__index, __obj, key], ...cast);
+        });
+      } else if (typeof val === 'object') {
         traverseFunc(val);
       } else if (cast.includes(key)) {
         operation(_obj, [key, val], ...cast);
@@ -11,8 +15,6 @@ const traverseFactory = (obj, operation, ...cast) => {
     });
   };
   traverseFunc(result);
-
-  Object.assign(obj, result);
 
   return result;
 };

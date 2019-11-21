@@ -1,1 +1,1 @@
-export { default as wordShapes } from './wordShapes'
+export { default as words } from './words';

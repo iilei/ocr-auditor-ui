@@ -5,10 +5,18 @@ import DocLoader from '../docLoader';
 
 export interface Plugin {
   context: 'canvas' | 'wrapper';
+  name: string;
   fn: PluginPromiseFactory;
 }
 
-export type PluginPromiseFactory = (options: Record<string, any>) => Promise
+export interface PluginSystem {
+  view: Record<string, any>;
+  root: Konva.Layer;
+  fn: Record<'traverse' | 'traverseFactory' | 'setState' | 'getState', Function>;
+  Konva: Konva;
+}
+
+export type PluginPromiseFactory = (options: PluginSystem) => Promise<PluginSystem>;
 
 export interface Options {
   stageNode: Konva.Stage;
