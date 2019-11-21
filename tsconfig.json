@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es6", "dom", "dom.iterable"],
-    "types": ["reflect-metadata"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "target": "es6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
