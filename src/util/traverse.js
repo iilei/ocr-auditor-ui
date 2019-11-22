@@ -17,9 +17,12 @@ const traverseFactory = (obj, operation, ...cast) => {
         _obj[key] = val.map((__obj, __index) => {
           return operation(__obj, [__index, __obj, key], ...cast);
         });
-      } else if (typeof val === 'object') {
+      } else if (typeof val === 'object' && !cast.includes(key)) {
         traverseFunc(val);
       } else if (cast.includes(key)) {
+        if (typeof val === 'object') {
+          traverseFunc(val);
+        }
         operation(_obj, [key, val], ...cast);
       }
     });

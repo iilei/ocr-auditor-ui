@@ -60,9 +60,54 @@ describe('traverse*', () => {
         traverse({ selector: [{ id: 'selector_1' }] }, obj => obj, 'selector[*]');
       }).toThrow('Cast not applicable to "traverse": selector[*]');
     });
+
+    it('handles Leaf', () => {
+      expect(traverse({ some: { selector: { foo: 3 } } }, obj => '__', 'foo')).toEqual({
+        some: { selector: { foo: '__' } },
+      });
+    });
+
+    it('handles branch', () => {
+      expect(traverse({ some: { selector: { foo: 3 } } }, obj => '__', 'selector')).toEqual({
+        some: { selector: '__' },
+      });
+    });
   });
 
   describe('traverseFactory', () => {
+    it('handles nested', () => {
+      const collection = [];
+      const visitor = jest.fn(val => collection.push(val));
+      traverseFactory(
+        {
+          some: { selector: { foo: 3 } },
+          lines: [
+            {
+              words: [true, false, true],
+            },
+            {
+              words: [1, 2, 3],
+            },
+            {
+              words: [{ nestInArray: { nestingDeeper: 42 } }],
+            },
+          ],
+        },
+        val => {
+          visitor(val);
+          return val;
+        },
+        'selector',
+        'foo',
+        'nestingDeeper',
+        'words[*]',
+      );
+      expect(visitor).toHaveBeenCalledTimes(9);
+      expect(collection[0]).toEqual({ foo: 3 });
+      expect(collection[1]).toEqual({ selector: { foo: 3 } });
+      expect(collection.slice(-7)).toEqual([true, false, true, 1, 2, 3, { nestInArray: { nestingDeeper: 42 } }]);
+    });
+
     it('handles `selector[*]`', () => {
       expect(traverseFactory(cloneDeep(input), obj => obj.content, 'words[*]')).toEqual({
         some: { words: ['This', 'is', 'a'] },
