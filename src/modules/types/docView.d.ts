@@ -22,6 +22,7 @@ export interface PluginSystem {
     getState: () => Record<string, any>;
   };
   Konva: Konva;
+  hooks: Array<any>;
 }
 
 export type PluginPromiseFactory = (options: PluginSystem) => Promise<PluginSystem>;
