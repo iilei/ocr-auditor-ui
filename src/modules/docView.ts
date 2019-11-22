@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Plugin, Options, Dimensions } from './types/docView';
-import { sequentially, traverse, traverseFactory } from '../util';
+import { sequentially, traverseFactory } from '../util';
 
 class DocView {
   _view: Record<'image', string>;
@@ -25,7 +25,7 @@ class DocView {
     this._root.add(this._img);
     this._stage.add(this._root);
     this._plugins = plugins.filter(plugin => plugin.context === 'canvas');
-    this.state = { plugins: { words: {views: []} } };
+    this.state = { plugins: { words: { views: [] } } };
 
     return this;
   }
@@ -34,7 +34,7 @@ class DocView {
     this.clear();
     const imgLoader = await this.loadImage(this._view.image);
     await this.pluginQueue();
-    this._stage.fire('initialized', this.state, true)
+    this._stage.fire('initialized', this.state, true);
 
     return imgLoader;
   };
@@ -47,7 +47,6 @@ class DocView {
           root: this._root,
           Konva,
           fn: {
-            traverse,
             traverseFactory,
             setState: (state: Record<string, any>) =>
               this.setState({ plugins: { ...this.state.plugins, [plugin.name]: state } }),
@@ -367,7 +366,7 @@ class DocView {
 
         this._img.add(img);
         this._root.batchDraw();
-        this.setState({img: {width, height, url}})
+        this.setState({ img: { width, height, url } });
         img.fire('load', this.state, true);
 
         resolve(imgOpts);

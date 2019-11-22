@@ -54,6 +54,12 @@ describe('traverse*', () => {
         traverse(cloneDeep(inputNested), str => (typeof str === 'string' ? str.toUpperCase() : str), 'o', 'c'),
       ).toEqual(expectation);
     });
+
+    it('Throws Error when cast matches `[*]`', async () => {
+      expect(() => {
+        traverse({ selector: [{ id: 'selector_1' }] }, obj => obj, 'selector[*]');
+      }).toThrow('Cast not applicable to "traverse": selector[*]');
+    });
   });
 
   describe('traverseFactory', () => {
@@ -61,6 +67,10 @@ describe('traverse*', () => {
       expect(traverseFactory(cloneDeep(input), obj => obj.content, 'words[*]')).toEqual({
         some: { words: ['This', 'is', 'a'] },
       });
+    });
+
+    it('Throws with Uncastable `selector[*].foo`', () => {
+      expect(() => traverseFactory({}, obj => obj.content, 'selector[*].foo')).toThrow('Uncastable: selector[*].foo');
     });
 
     it('can handle multiple <string>[*] accessors', () => {

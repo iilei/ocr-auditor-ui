@@ -12,7 +12,7 @@ export interface Plugin {
 export interface PluginSystem {
   view: Record<string, any>;
   root: Konva.Layer;
-  fn: Record<'traverse' | 'traverseFactory' | 'setState' | 'getState', Function>;
+  fn: Record<'traverseFactory' | 'setState' | 'getState', Function>;
   Konva: Konva;
 }
 

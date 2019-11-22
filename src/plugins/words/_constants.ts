@@ -1,2 +1,2 @@
 export const name = 'words';
-export const context  = 'canvas';
+export const context = 'canvas';

@@ -1,5 +1,3 @@
 import views from './views';
 
-export default [
-  views
-];
+export default [views];

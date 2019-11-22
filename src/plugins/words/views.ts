@@ -1,4 +1,4 @@
-import { name, context }  from './_constants'
+import { name, context } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 
 const views: Plugin = {
@@ -9,7 +9,7 @@ const views: Plugin = {
       try {
         const { view, fn } = opts;
         const views: Array<Record<string, any>> = [];
-        fn.traverse(
+        fn.traverseFactory(
           view,
           (obj: Record<string, any>) => {
             views.push(obj);
