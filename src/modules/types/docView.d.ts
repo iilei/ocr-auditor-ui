@@ -2,8 +2,7 @@
 // for inspirations
 import Konva from 'konva';
 import DocLoader from '../docLoader';
-import shape from '../../util/shape';
-import { traverseFactory } from '../../util';
+import { filterDeep, eachDeep, shape } from '../../util';
 
 export interface Plugin {
   context: 'canvas' | 'wrapper';
@@ -16,7 +15,8 @@ export interface PluginSystem {
   root: Konva.Layer;
   fn: {
     shape: typeof shape;
-    traverseFactory: typeof traverseFactory;
+    eachDeep: typeof eachDeep;
+    filterDeep: typeof filterDeep;
     sequentially: (promises: Array<Promise>) => void;
     setState: (state: Record<string, any>) => void;
     getState: () => Record<string, any>;

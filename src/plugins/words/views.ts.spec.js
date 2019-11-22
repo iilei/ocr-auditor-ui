@@ -1,6 +1,5 @@
 import { flatten } from 'lodash';
 import views from './views';
-import { traverseFactory } from '../../util';
 
 const stubOpts = {
   view: {
@@ -11,8 +10,8 @@ const stubOpts = {
     ],
   },
   fn: {
-    traverseFactory,
     setState: jest.fn(),
+    eachDeep: require('../../util/eachDeep').default,
   },
 };
 

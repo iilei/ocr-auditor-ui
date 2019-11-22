@@ -1,38 +1,43 @@
 import { name, context, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 
-const prepareScaffoldingObj = (tokens: Array<string>): Record<string, Array<Record<string, any>>> =>
-  tokens.reduce((acc, cur) => {
-    return { ...acc, [cur]: [] };
-  }, {});
-
 const shapes: Plugin = {
   context,
   name,
   fn: <PluginPromiseFactory>(opts: PluginSystem) =>
     new Promise((resolve, reject) => {
-      const {
-        view,
-        fn: {
-          traverseFactory,
-          shape: { bbox },
-          setState,
-        },
-      } = opts;
-      // prepare scaffolding obj
-      const shapes = prepareScaffoldingObj(tokens);
-      traverseFactory(
-        view,
-        (obj: Record<string, any>, [key]: [string]) => {
-          const boxes = obj[key].map((item: Record<'bbox', Record<string, number>>) => bbox(item.bbox));
-          shapes[key].push(...boxes);
-          return obj;
-        },
-        ...tokens,
-      );
+      try {
+        const { view, fn } = opts;
+        fn.eachDeep(
+          { ...view },
+          // TODO reuse types
+          (child: Record<string, any>, i: string, parent: Record<string, any>, ctx: Record<string, any>) => {
+            if (ctx.parent) {
+              const outerBox = ctx.parent.value.bbox;
+              const innerBox = child.bbox;
+              const bulk = parent[ctx.childrenPath];
+              const index = parseInt(i, 10);
+              let prev;
+              let next;
 
-      setState({ shapes, tokens });
-      resolve(opts);
+              if (index > 0) {
+                prev = bulk[index - 1];
+              }
+              // TBD align left Boundary with outer ?
+              if (index < bulk.length - 1) {
+                next = bulk[index + 1];
+              }
+              // TBD align right Boundary with outer ?
+
+              // TODO use next and prev - or outerBox if n/a to determine how to distribute items
+            }
+          },
+          { childrenPath: tokens, includeRoot: true },
+        );
+        resolve(opts);
+      } catch (e) {
+        reject(new Error(e));
+      }
     }),
 };
 

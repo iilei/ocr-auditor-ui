@@ -1,4 +1,4 @@
-import { name, context } from './_constants';
+import { name, context, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 
 const views: Plugin = {
@@ -9,13 +9,15 @@ const views: Plugin = {
       try {
         const { view, fn } = opts;
         const views: Array<Record<string, any>> = [];
-        fn.traverseFactory(
-          view,
-          (obj: Record<string, any>) => {
-            views.push(obj);
-            return obj;
+        fn.eachDeep(
+          { ...view },
+          // TODO reuse Types
+          (child: Record<string, any>, i: number, parent: Record<string, any>, ctx: Record<string, any>) => {
+            if (ctx.parent && ctx.parent.path && ctx.childrenPath === name) {
+              views.push(child);
+            }
           },
-          'words[*]',
+          { childrenPath: tokens, includeRoot: true },
         );
         fn.setState({ views });
         resolve(opts);
