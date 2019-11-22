@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Plugin, Options, Dimensions } from './types/docView';
-import { sequentially, traverseFactory } from '../util';
+import { sequentially, traverseFactory, shape } from '../util';
 
 class DocView {
   _view: Record<'image', string>;
@@ -47,7 +47,9 @@ class DocView {
           root: this._root,
           Konva,
           fn: {
+            shape,
             traverseFactory,
+            sequentially,
             setState: (state: Record<string, any>) =>
               this.setState({ plugins: { ...this.state.plugins, [plugin.name]: state } }),
             getState: () => this.state,

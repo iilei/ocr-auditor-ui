@@ -1,4 +1,4 @@
-const bboxToRectProps = (bbox: Array<Array<number>>) => {
+const bbox = (bbox: Array<Array<number>>) => {
   const [lb, rt] = bbox;
   const [x0, y0] = lb;
   const [x1, y1] = rt;
@@ -11,4 +11,6 @@ const bboxToRectProps = (bbox: Array<Array<number>>) => {
   };
 };
 
-export default bboxToRectProps;
+const snapTo = () => {};
+
+export { bbox, snapTo };

@@ -1,3 +1,4 @@
 import { words } from './';
+import { tree } from './';
 
-export default [words];
+export default [tree, words];
