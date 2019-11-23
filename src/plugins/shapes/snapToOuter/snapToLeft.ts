@@ -1,5 +1,5 @@
 const snapToLeft = (options: GapDistributionOptions & SnapToOuterOptions) => {
-  const { snapLeft, prev, outerBox, innerBox, kindOf, padding } = options;
+  const { snappy, prev, outerBox, innerBox, kindOf, padding } = options;
   const { left: leftOffset } = padding || {};
 
   let offset = 0;
@@ -7,7 +7,7 @@ const snapToLeft = (options: GapDistributionOptions & SnapToOuterOptions) => {
     offset = innerBox.x - (leftOffset || 0);
   }
 
-  if (!prev || (kindOf !== 'words' && snapLeft)) {
+  if (!prev || (kindOf !== 'words' && snappy)) {
     const padLeft = Math.abs(outerBox.x - innerBox.x);
     return {
       ...options,

@@ -23,6 +23,7 @@
     "src"
   ],
   "files": [
-    "types.d.ts"
+    "types.d.ts",
+    "node_modules/konva/types/index.d.ts"
   ]
 }

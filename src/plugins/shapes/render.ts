@@ -1,7 +1,8 @@
-import { cloneDeep, set } from 'lodash';
-import { name, context, tokens } from './_constants';
+import { name, context, tokens, defaultOptions, renderOptions } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
+import distributeGaps from './distributeGaps';
 import snapToOuter from './snapToOuter';
+import strokeInset from './strokeInset';
 
 const render: Plugin = {
   context,
@@ -9,9 +10,14 @@ const render: Plugin = {
   fn: <PluginPromiseFactory>(opts: PluginSystem) =>
     new Promise((resolve, reject) => {
       try {
-        const { view, fn, root, Konva } = opts;
+        const {
+          view,
+          fn: { reduceDeep, set, cloneDeep, shape },
+          root,
+          Konva,
+        } = opts;
 
-        fn.reduceDeep(
+        reduceDeep(
           view,
           // TODO reuse types
           (
@@ -22,6 +28,7 @@ const render: Plugin = {
             ctx: Record<string, any>,
           ) => {
             if (ctx.parent) {
+              const currentGroup = new Konva.Group({ id: child.id });
               const outerBox = ctx.parent.value.bbox;
               const innerBox = child.bbox;
               const bulk = parent[ctx.childrenPath];
@@ -32,26 +39,52 @@ const render: Plugin = {
               if (index > 0) {
                 prev = bulk[index - 1].bbox;
               }
-              // TBD align left Boundary with outer ?
+
               if (index < bulk.length - 1) {
                 next = bulk[index + 1].bbox;
               }
-              // TBD align right Boundary with outer ?
+
               const bboxOptions = {
-                outerBox: fn.shape.bbox(outerBox),
-                innerBox: fn.shape.bbox(innerBox),
-                prev: prev && fn.shape.bbox(prev),
-                next: next && fn.shape.bbox(next),
+                outerBox: shape.bbox(outerBox),
+                innerBox: shape.bbox(innerBox),
+                prev: prev && shape.bbox(prev),
+                next: next && shape.bbox(next),
               };
-              const box = snapToOuter(bboxOptions, { snapLeft: true, kindOf: ctx.childrenPath, padding: { left: 12 } })
-                .innerBox;
+              const snapOptions = { ...defaultOptions, kindOf: ctx.childrenPath };
+              // todo - extract mechanism that derives from kindOf whether it is about vertical or horizontal distribution
+              const box = distributeGaps(snapToOuter(bboxOptions, snapOptions), snapOptions).innerBox;
 
               // TODO; configurable paint boxes
               if (ctx.childrenPath === 'words') {
-                root.add(new Konva.Rect({ ...box, fill: 'orange', opacity: 0.3 }));
+                currentGroup.addName(child.content);
+
+                // TODO extract eventListeners
+                currentGroup.addEventListener('dblclick', (event: MouseEvent) => {
+                  event.stopImmediatePropagation();
+                  const box = currentGroup.findOne('.box');
+                  const outer = currentGroup.findOne('.outer');
+                  const { id, name: content } = currentGroup.attrs;
+                  const payload = { content, id, box, outer, path: ctx.path };
+                  currentGroup.fire('tokenfocus', { ...event, payload }, true);
+                });
+
+                const outerShape = new Konva.Rect({ ...box, ...renderOptions.outer, name: 'outer' });
+                currentGroup.add(outerShape);
+                const innerShape = new Konva.Rect(
+                  strokeInset({ ...shape.bbox(innerBox), ...renderOptions.inner, name: 'box' }),
+                );
+                currentGroup.add(innerShape);
+              } else {
+                currentGroup.add(new Konva.Rect({ ...box, name: 'outer' }));
               }
 
-              set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: fn.shape.bboxReverse(box) }));
+              const parentGroup: typeof Konva.Group = root.findOne(`#${ctx.parent.value.id}`);
+              parentGroup.add(currentGroup);
+
+              set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: shape.bboxReverse(box) }));
+            } else {
+              const currentGroup = new Konva.Group({ id: child.id });
+              root.add(currentGroup);
             }
             return accumulator;
           },

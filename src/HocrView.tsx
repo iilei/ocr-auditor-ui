@@ -45,7 +45,7 @@ class HocrView extends Component<Props> {
   onKeyPress: Function;
   onLoad: Function;
   onInitialized: Function;
-  onTokenFocus: Function;
+  onTokenfocus: Function;
   plugins: Array<Plugin>;
 
   state = {
@@ -68,7 +68,7 @@ class HocrView extends Component<Props> {
       onKeyPress = noop,
       onDblClick = noop,
       onLoad = noop,
-      onTokenFocus = noop,
+      onTokenfocus = noop,
       onInitialized = noop,
     } = props;
 
@@ -76,8 +76,8 @@ class HocrView extends Component<Props> {
     this.onClick = onClick;
     this.onKeyPress = onKeyPress;
     this.onLoad = onLoad;
-    this.onTokenFocus = onTokenFocus;
     this.onInitialized = onInitialized;
+    this.onTokenfocus = onTokenfocus;
     this.docLoader = new DocLoader(`/${id}.json`, String(page));
     this.stageRef = { current: null };
     this.plugins = plugins;
@@ -89,7 +89,11 @@ class HocrView extends Component<Props> {
     if (node) {
       this.docLoader.get().then(
         async view => {
-          this.docView = new DocView({ stageNode: node.getStage(), doc: this.docLoader, plugins: this.plugins });
+          this.docView = new DocView({
+            stageNode: node.getStage(),
+            doc: this.docLoader,
+            plugins: this.plugins,
+          });
           await this.docView.init();
           // TODO: refactor and use onLoad Event handler instead
           const image: Konva.Image = this.docView.image!;
@@ -104,8 +108,8 @@ class HocrView extends Component<Props> {
     this.setState({ width, height });
   };
 
-  handleDoubleClick = (event: KonvaEventObject<MouseEvent>) => {
-    this.onTokenFocus(event);
+  handleTokenFocus = (event: KonvaEventObject<MouseEvent>) => {
+    this.onTokenfocus(event);
   };
 
   handleLoad = (event: KonvaEventObject<Event>) => {
@@ -125,7 +129,7 @@ class HocrView extends Component<Props> {
         ref={this.stageRef}
         width={width}
         height={height}
-        onDblClick={this.handleDoubleClick}
+        onTokenfocus={this.handleTokenFocus}
         onLoad={this.handleLoad}
         onInitialized={this.handleInitialized}
       />

@@ -13,9 +13,9 @@ declare interface SnapToOuterOptions {
   kindOf?: 'careas' | 'pars' | 'lines' | 'words';
   padding?: {
     left?: number;
+    lineEnd?: number;
   };
-  snapLeft?: Boolean;
-  // snapRight?: Boolean;
+  snappy?: Boolean;
 }
 
 declare type ShapeOptionsNullable = ShapeOptions | false | null | undefined;

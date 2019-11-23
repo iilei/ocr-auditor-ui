@@ -1,4 +1,5 @@
 import Konva from 'konva';
+import { get, set, cloneDeep } from 'lodash';
 import { Plugin, Options, Dimensions } from './types/docView';
 import { sequentially, eachDeep, filterDeep, mapDeep, reduceDeep, shape } from '../util';
 
@@ -45,6 +46,7 @@ class DocView {
         plugin.fn({
           view: this._view,
           root: this._root,
+          stage: this._stage,
           Konva,
           fn: {
             shape,
@@ -52,6 +54,9 @@ class DocView {
             mapDeep,
             filterDeep,
             reduceDeep,
+            cloneDeep,
+            set,
+            get,
             sequentially,
             setState: (state: Record<string, any>) =>
               this.setState({ plugins: { ...this.state.plugins, [plugin.name]: state } }),

@@ -11,6 +11,6 @@ export default {
   // decorators: [withKnobs],
 };
 
-const eventsFromObject = actions('onLoad', 'onTokenFocus', 'onInitialized');
+const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized');
 
 export const phototestPage1 = () => <HocrView {...eventsFromObject} id="phototest" page={1} />;

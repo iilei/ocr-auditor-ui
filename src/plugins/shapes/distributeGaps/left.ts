@@ -1,14 +1,13 @@
 const left = (options: GapDistributionOptions & SnapToOuterOptions) => {
-  const { outerBox, innerBox, prev } = options;
-  const { height, y } = outerBox;
-  let adjustedX = innerBox.x;
+  const { innerBox, prev, kindOf } = options;
 
-  let leftPad = 0;
-  if (prev) {
-    leftPad = (innerBox.x - (prev.x + prev.width)) / 2;
+  if (!prev || kindOf !== 'words') {
+    return options;
   }
+  // the gap side which is adjusted first politely only takes half the gap space
+  const gap = Math.abs(prev.x + prev.width - innerBox.x) / 2;
 
-  const newInnerBox = { ...innerBox, width: innerBox.width + leftPad, height, x: innerBox.x - leftPad, y };
+  const newInnerBox = { ...innerBox, width: innerBox.width + gap, x: innerBox.x - gap };
   return { ...options, innerBox: newInnerBox };
 };
 
