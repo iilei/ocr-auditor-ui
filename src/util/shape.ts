@@ -1,7 +1,9 @@
 const bbox = (bbox: Array<Array<number>>) => {
-  const [lb, rt] = bbox;
-  const [x0, y0] = lb;
-  const [x1, y1] = rt;
+  // * the order of the values are `x0 y0 x1 y1` = "left top right bottom"
+  // https://github.com/kba/hocr-spec/issues/34
+  const [lt, rb] = bbox;
+  const [x0, y0] = lt;
+  const [x1, y1] = rb;
 
   return {
     height: y1 - y0,

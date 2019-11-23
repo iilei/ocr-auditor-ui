@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep, set } from 'lodash';
 import { name, context, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 import { leftRight as distributeGaps } from './distributeGaps';
@@ -10,16 +10,22 @@ const render: Plugin = {
     new Promise((resolve, reject) => {
       try {
         const { view, fn, root, Konva } = opts;
-        // TODO use https://deepdash.io/#reducedeep so that the new dimensions / offset is taken into acount upon each traversal
-        fn.mapDeep(
-          cloneDeep(view),
+
+        fn.reduceDeep(
+          view,
           // TODO reuse types
-          (child: Record<string, any>, i: string, parent: Record<string, any>, ctx: Record<string, any>) => {
+          (
+            accumulator: Record<string, any>,
+            child: Record<string, any>,
+            i: string | number,
+            parent: Record<string, any>,
+            ctx: Record<string, any>,
+          ) => {
             if (ctx.parent) {
               const outerBox = ctx.parent.value.bbox;
               const innerBox = child.bbox;
               const bulk = parent[ctx.childrenPath];
-              const index = parseInt(i, 10);
+              const index = typeof i === 'string' ? parseInt(i, 10) : i;
               let prev;
               let next;
 
@@ -37,17 +43,18 @@ const render: Plugin = {
                 prev: prev && fn.shape.bbox(prev),
                 next: next && fn.shape.bbox(next),
               };
+              const box = distributeGaps(bboxOptions, { snapLeft: true, kindOf: ctx.childrenPath }).innerBox;
 
-              const box = distributeGaps(bboxOptions, { snapLeft: true }).innerBox;
-
-              // TODO; configurable paintable boxes
+              // TODO; configurable paint boxes
               if (ctx.childrenPath === 'words') {
                 root.add(new Konva.Rect({ ...box, fill: 'orange', opacity: 0.3 }));
               }
 
-              return Object.assign(child, { ...child, bbox: fn.shape.bboxReverse(box) });
+              set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: fn.shape.bboxReverse(box) }));
             }
+            return accumulator;
           },
+          cloneDeep(view),
           { childrenPath: tokens, includeRoot: true },
         );
         root.batchDraw();

@@ -10,6 +10,7 @@ declare interface ShapeOptions {
 }
 
 declare interface SnapToOuterOptions {
+  kindOf: 'careas' | 'pars' | 'lines' | 'words';
   snapLeft?: Boolean;
   // snapRight?: Boolean;
 }
