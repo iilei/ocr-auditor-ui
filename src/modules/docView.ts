@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Plugin, Options, Dimensions } from './types/docView';
-import { sequentially, eachDeep, filterDeep, shape } from '../util';
+import { sequentially, eachDeep, filterDeep, mapDeep, shape } from '../util';
 
 class DocView {
   _view: Record<'image', string>;
@@ -49,6 +49,7 @@ class DocView {
           fn: {
             shape,
             eachDeep,
+            mapDeep,
             filterDeep,
             sequentially,
             setState: (state: Record<string, any>) =>

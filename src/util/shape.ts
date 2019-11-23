@@ -11,6 +11,13 @@ const bbox = (bbox: Array<Array<number>>) => {
   };
 };
 
-const snapTo = () => {};
+const bboxReverse = (bbox: ShapeOptions): Array<Array<number>> => {
+  const { width, height, x, y } = bbox;
 
-export { bbox, snapTo };
+  return [
+    [x, y],
+    [width + x, height + y],
+  ];
+};
+
+export { bbox, bboxReverse };

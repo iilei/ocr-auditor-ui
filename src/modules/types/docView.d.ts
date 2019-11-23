@@ -2,7 +2,7 @@
 // for inspirations
 import Konva from 'konva';
 import DocLoader from '../docLoader';
-import { filterDeep, eachDeep, shape } from '../../util';
+import { filterDeep, eachDeep, mapDeep, shape } from '../../util';
 
 export interface Plugin {
   context: 'canvas' | 'wrapper';
@@ -16,6 +16,7 @@ export interface PluginSystem {
   fn: {
     shape: typeof shape;
     eachDeep: typeof eachDeep;
+    mapDeep: typeof mapDeep;
     filterDeep: typeof filterDeep;
     sequentially: (promises: Array<Promise>) => void;
     setState: (state: Record<string, any>) => void;

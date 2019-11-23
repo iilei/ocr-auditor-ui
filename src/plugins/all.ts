@@ -1,4 +1,4 @@
 import { words } from './';
-import { tree } from './';
+import { shapes } from './';
 
-export default [words, tree];
+export default [words, shapes];
