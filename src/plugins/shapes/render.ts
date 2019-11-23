@@ -1,7 +1,7 @@
 import { cloneDeep, set } from 'lodash';
 import { name, context, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
-import { leftRight as distributeGaps } from './distributeGaps';
+import snapToOuter from './snapToOuter';
 
 const render: Plugin = {
   context,
@@ -43,7 +43,8 @@ const render: Plugin = {
                 prev: prev && fn.shape.bbox(prev),
                 next: next && fn.shape.bbox(next),
               };
-              const box = distributeGaps(bboxOptions, { snapLeft: true, kindOf: ctx.childrenPath }).innerBox;
+              const box = snapToOuter(bboxOptions, { snapLeft: true, kindOf: ctx.childrenPath, padding: { left: 12 } })
+                .innerBox;
 
               // TODO; configurable paint boxes
               if (ctx.childrenPath === 'words') {
