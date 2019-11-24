@@ -1,4 +1,3 @@
-import { flatten } from 'lodash';
 import views from './views';
 
 const stubOpts = {
@@ -31,11 +30,9 @@ describe('views', () => {
 
   describe('fn', () => {
     it('assigns state according to word views found in view', done => {
-      const promise = views.fn(stubOpts);
-      promise.then(function() {
-        expect(flatten(stubOpts.fn.setState.mock.calls)).toEqual([
-          { views: [{ i: '0_0' }, { i: '0_1' }, { i: '1_0' }, { i: '2_0' }, { i: '2_1' }] },
-        ]);
+      const promise = views.fn(stubOpts)();
+      promise.then(result => {
+        expect(result).toEqual({ views: [{ i: '0_0' }, { i: '0_1' }, { i: '1_0' }, { i: '2_0' }, { i: '2_1' }] });
         done();
       });
     });

@@ -6,8 +6,9 @@ import { DocLoader, DocView } from './modules';
 import { Plugin, Dimensions } from './modules/types/docView';
 import allPlugins from './plugins/all';
 
+import defaultPluginOptions from './plugins/options';
 import Konva from 'konva';
-import { flatten } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 
 export interface KeyboardEvents {
   onKeyPress?(evt: Konva.KonvaEventObject<Event>): void;
@@ -93,11 +94,18 @@ class HocrView extends Component<Props> {
             stageNode: node.getStage(),
             doc: this.docLoader,
             plugins: this.plugins,
+            pluginOptions: this.props.pluginOptions || defaultPluginOptions,
           });
           await this.docView.init();
           // TODO: refactor and use onLoad Event handler instead
           const image: Konva.Image = this.docView.image!;
           this.resize({ height: image.getHeight(), width: image.getWidth() });
+
+          this.componentDidUpdate = (prevProps: Record<string, any>) => {
+            if (!isEqual(this.props.pluginOptions, prevProps.pluginOptions)) {
+              this.docView!.setState({ plugins: this.props.pluginOptions });
+            }
+          };
         },
         error => {},
       );
@@ -132,6 +140,7 @@ class HocrView extends Component<Props> {
         onTokenfocus={this.handleTokenFocus}
         onLoad={this.handleLoad}
         onInitialized={this.handleInitialized}
+        pluginOptions={this.props.pluginOptions || defaultPluginOptions}
       />
     );
   }

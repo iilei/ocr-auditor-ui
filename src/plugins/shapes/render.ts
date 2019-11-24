@@ -1,102 +1,121 @@
-import { name, context, tokens, defaultOptions, renderOptions } from './_constants';
+import { name, context, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 import distributeGaps from './distributeGaps';
 import snapToOuter from './snapToOuter';
 import strokeInset from './strokeInset';
 
-const render: Plugin = {
+// @ts-ignore
+let render: Plugin = {
   context,
   name,
-  fn: <PluginPromiseFactory>(opts: PluginSystem) =>
-    new Promise((resolve, reject) => {
-      try {
-        const {
-          view,
-          fn: { reduceDeep, set, cloneDeep, shape },
-          root,
-          Konva,
-        } = opts;
+  stateCallback: async (options: Record<string, any>) => {
+    render.init(options);
+  },
+  fn: <PluginPromiseFactory>(pluginSystem: PluginSystem) => {
+    const {
+      view,
+      stage,
+      fn: { reduceDeep, set, cloneDeep, shape },
+      root,
+      Konva,
+    } = pluginSystem;
 
-        reduceDeep(
-          view,
-          // TODO reuse types
-          (
-            accumulator: Record<string, any>,
-            child: Record<string, any>,
-            i: string | number,
-            parent: Record<string, any>,
-            ctx: Record<string, any>,
-          ) => {
-            if (ctx.parent) {
-              const currentGroup = new Konva.Group({ id: child.id });
-              const outerBox = ctx.parent.value.bbox;
-              const innerBox = child.bbox;
-              const bulk = parent[ctx.childrenPath];
-              const index = typeof i === 'string' ? parseInt(i, 10) : i;
-              let prev;
-              let next;
-
-              if (index > 0) {
-                prev = bulk[index - 1].bbox;
-              }
-
-              if (index < bulk.length - 1) {
-                next = bulk[index + 1].bbox;
-              }
-
-              const bboxOptions = {
-                outerBox: shape.bbox(outerBox),
-                innerBox: shape.bbox(innerBox),
-                prev: prev && shape.bbox(prev),
-                next: next && shape.bbox(next),
-              };
-              const snapOptions = { ...defaultOptions, kindOf: ctx.childrenPath };
-              // todo - extract mechanism that derives from kindOf whether it is about vertical or horizontal distribution
-              const box = distributeGaps(snapToOuter(bboxOptions, snapOptions), snapOptions).innerBox;
-
-              // TODO; configurable paint boxes
-              if (ctx.childrenPath === 'words') {
-                currentGroup.addName(child.content);
-
-                // TODO extract eventListeners
-                currentGroup.addEventListener('dblclick', (event: MouseEvent) => {
-                  event.stopImmediatePropagation();
-                  const box = currentGroup.findOne('.box');
-                  const outer = currentGroup.findOne('.outer');
-                  const { id, name: content } = currentGroup.attrs;
-                  const payload = { content, id, box, outer, path: ctx.path };
-                  currentGroup.fire('tokenfocus', { ...event, payload }, true);
-                });
-
-                const outerShape = new Konva.Rect({ ...box, ...renderOptions.outer, name: 'outer' });
-                currentGroup.add(outerShape);
-                const innerShape = new Konva.Rect(
-                  strokeInset({ ...shape.bbox(innerBox), ...renderOptions.inner, name: 'box' }),
-                );
-                currentGroup.add(innerShape);
-              } else {
-                currentGroup.add(new Konva.Rect({ ...box, name: 'outer' }));
-              }
-
-              const parentGroup: typeof Konva.Group = root.findOne(`#${ctx.parent.value.id}`);
-              parentGroup.add(currentGroup);
-
-              set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: shape.bboxReverse(box) }));
-            } else {
-              const currentGroup = new Konva.Group({ id: child.id });
-              root.add(currentGroup);
-            }
-            return accumulator;
-          },
-          cloneDeep(view),
-          { childrenPath: tokens, includeRoot: true },
-        );
-        root.batchDraw();
-        resolve(opts);
-      } catch (e) {
-        reject(new Error(e));
+    render.init = (options: Record<string, any>) => {
+      const clonedView = cloneDeep(view);
+      const former = stage.findOne(`#${name}`);
+      if (former) {
+        former.destroy();
       }
-    }),
+
+      const pluginGroup = new Konva.Group({ id: name });
+      root.add(pluginGroup);
+
+      return new Promise((resolve, reject) => {
+        try {
+          reduceDeep(
+            clonedView,
+            // TODO reuse types
+            (
+              accumulator: Record<string, any>,
+              child: Record<string, any>,
+              i: string | number,
+              parent: Record<string, any>,
+              ctx: Record<string, any>,
+            ) => {
+              if (ctx.parent) {
+                const currentGroup = new Konva.Group({ id: child.id });
+                const outerBox = ctx.parent.value.bbox;
+                const innerBox = child.bbox;
+                const bulk = parent[ctx.childrenPath];
+                const index = typeof i === 'string' ? parseInt(i, 10) : i;
+                let prev;
+                let next;
+
+                if (index > 0) {
+                  prev = bulk[index - 1].bbox;
+                }
+
+                if (index < bulk.length - 1) {
+                  next = bulk[index + 1].bbox;
+                }
+
+                const bboxOptions = {
+                  outerBox: shape.bbox(outerBox),
+                  innerBox: shape.bbox(innerBox),
+                  prev: prev && shape.bbox(prev),
+                  next: next && shape.bbox(next),
+                };
+                const snapOptions = { ...options.snapOptions, kindOf: ctx.childrenPath };
+                // todo - extract mechanism that derives from kindOf whether it is about vertical or horizontal distribution
+                const box = distributeGaps(snapToOuter(bboxOptions, snapOptions), snapOptions).innerBox;
+
+                // TODO; configurable paint boxes
+                if (ctx.childrenPath === 'words') {
+                  currentGroup.addName(child.content);
+
+                  // TODO extract eventListeners
+                  currentGroup.addEventListener('dblclick', (event: MouseEvent) => {
+                    event.stopImmediatePropagation();
+                    const box = currentGroup.findOne('.box');
+                    const outer = currentGroup.findOne('.outer');
+                    const { id, name: content } = currentGroup.attrs;
+
+                    const payload = { content, id, box, outer, path: ctx.path, plugin: name };
+                    currentGroup.fire('tokenfocus', { ...event, payload }, true);
+                  });
+
+                  const outerShape = new Konva.Rect({ ...box, ...options.outer, name: 'outer' });
+                  currentGroup.add(outerShape);
+                  const innerShape = new Konva.Rect(
+                    strokeInset({ ...shape.bbox(innerBox), ...options.inner, name: 'box' }),
+                  );
+                  currentGroup.add(innerShape);
+                } else {
+                  currentGroup.add(new Konva.Rect({ ...box, name: 'outer' }));
+                }
+
+                const parentGroup: typeof Konva.Group = root.findOne(`#${ctx.parent.value.id}`);
+                parentGroup.add(currentGroup);
+
+                set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: shape.bboxReverse(box) }));
+              } else {
+                const currentGroup = new Konva.Group({ id: child.id });
+                pluginGroup.add(currentGroup);
+              }
+              return accumulator;
+            },
+            clonedView,
+            { childrenPath: tokens, includeRoot: true },
+          );
+          root.batchDraw();
+          resolve(pluginGroup);
+        } catch (e) {
+          reject(new Error(e));
+        }
+      });
+    };
+    return (options: Record<string, any>) => render.init(options);
+  },
 };
 
 export default render;

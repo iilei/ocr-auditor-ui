@@ -10,12 +10,15 @@ export interface Plugin {
   context: 'canvas' | 'wrapper';
   name: string;
   fn: PluginPromiseFactory;
+  init: Function;
+  stateCallback?: (state: Record<string, any>) => Promise<void>;
 }
 
 export interface PluginSystem {
   view: Record<string, any>;
   root: Konva.Layer;
   stage: Konva.Stage;
+  pluginOptions?: Record<string, any>;
   fn: {
     shape: typeof shape;
     eachDeep: typeof eachDeep;
@@ -26,13 +29,12 @@ export interface PluginSystem {
     set: typeof set;
     cloneDeep: typeof cloneDeep;
     sequentially: (promises: Array<Promise>) => void;
-    setState: (state: Record<string, any>) => void;
     getState: () => Record<string, any>;
   };
   Konva: Konva;
 }
 
-export type PluginPromiseFactory = (options: PluginSystem) => Promise<PluginSystem>;
+export type PluginPromiseFactory = (pluginSystem: PluginSystem) => (options: Record<string, any>) => Promise<unknown>;
 
 export interface Options {
   stageNode: Konva.Stage;
