@@ -51,7 +51,7 @@
     "test": "rescripts test",
     "storybook": "start-storybook -p 9009 -s public",
     "fmt": "eslint --fix \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" && prettier --write \"src/**/*.{j,t}{s,sx}\" \"*.{j,t}{s,sx}\" ",
-    "build-storybook": "build-storybook -s public",
+    "build-storybook": "build-storybook --static-dir public --output-dir .storybook-static",
     "tsc": "tsc"
   },
   "eslintConfig": {

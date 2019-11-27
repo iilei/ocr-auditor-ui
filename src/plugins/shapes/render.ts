@@ -78,14 +78,14 @@ let render: Plugin = {
                   currentGroup.addName(child.content);
 
                   // TODO extract eventListeners
-                  currentGroup.addEventListener('dblclick', (event: MouseEvent) => {
+                  currentGroup.addEventListener('dblclick mousedown mouseup', (event: MouseEvent) => {
                     event.stopImmediatePropagation();
                     const box = currentGroup.findOne('.box');
                     const outer = currentGroup.findOne('.outer');
                     const { id, name: content } = currentGroup.attrs;
 
                     const payload = { content, id, box, outer, path: ctx.path, plugin: name, raw: get(view, ctx.path) };
-                    currentGroup.fire('tokenfocus', { ...event, payload }, true);
+                    Object.assign(event, { payload });
                   });
 
                   const confOpts = confidenceShapeOptions(box, confidence, child.xWconf);

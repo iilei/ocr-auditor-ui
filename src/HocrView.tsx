@@ -44,6 +44,8 @@ class HocrView extends Component<Props> {
   onDblClick: Function;
   onClick: Function;
   onKeyPress: Function;
+  onMouseUp: Function;
+  onMouseDown: Function;
   onLoad: Function;
   onInitialized: Function;
   onTokenfocus: Function;
@@ -71,12 +73,16 @@ class HocrView extends Component<Props> {
       onLoad = noop,
       onTokenfocus = noop,
       onInitialized = noop,
+      onMouseUp = noop,
+      onMouseDown = noop,
     } = props;
 
     this.onDblClick = onDblClick;
     this.onClick = onClick;
     this.onKeyPress = onKeyPress;
     this.onLoad = onLoad;
+    this.onMouseUp = onMouseUp;
+    this.onMouseDown = onMouseDown;
     this.onInitialized = onInitialized;
     this.onTokenfocus = onTokenfocus;
     this.docLoader = new DocLoader(`/${id}.json`, String(page));
@@ -137,7 +143,9 @@ class HocrView extends Component<Props> {
         ref={this.stageRef}
         width={width}
         height={height}
-        onTokenfocus={this.handleTokenFocus}
+        onDblClick={this.handleTokenFocus}
+        onMouseDown={this.props.onMouseDown}
+        onMouseUp={this.props.onMouseUp}
         onLoad={this.handleLoad}
         onInitialized={this.handleInitialized}
         pluginOptions={this.props.pluginOptions || defaultPluginOptions}

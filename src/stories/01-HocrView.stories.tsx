@@ -12,7 +12,7 @@ export default {
   decorators: [withKnobs],
 };
 
-const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized');
+const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized', 'onMouseDown', 'onMouseUp');
 
 export const phototestPage1 = () => (
   <HocrView {...eventsFromObject} id="phototest" page={1} pluginOptions={object('Plugin Options', pluginOptions)} />
