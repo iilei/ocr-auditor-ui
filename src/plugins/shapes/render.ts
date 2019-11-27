@@ -3,6 +3,9 @@ import { Plugin, PluginSystem } from '../../modules/types/docView';
 import distributeGaps from './distributeGaps';
 import snapToOuter from './snapToOuter';
 import strokeInset from './strokeInset';
+import { confidenceShapeOptions } from './confidenceShapeOptions';
+
+const WORDS_TOKEN = tokens[tokens.length - 1];
 
 // @ts-ignore
 let render: Plugin = {
@@ -15,7 +18,7 @@ let render: Plugin = {
     const {
       view,
       stage,
-      fn: { reduceDeep, set, cloneDeep, shape },
+      fn: { reduceDeep, set, cloneDeep, shape, get },
       root,
       Konva,
     } = pluginSystem;
@@ -29,6 +32,7 @@ let render: Plugin = {
 
       const pluginGroup = new Konva.Group({ id: name });
       root.add(pluginGroup);
+      const { confidence, snapOptions: snap } = options;
 
       return new Promise((resolve, reject) => {
         try {
@@ -65,12 +69,12 @@ let render: Plugin = {
                   prev: prev && shape.bbox(prev),
                   next: next && shape.bbox(next),
                 };
-                const snapOptions = { ...options.snapOptions, kindOf: ctx.childrenPath };
+                const snapOptions = { ...snap, kindOf: ctx.childrenPath };
+
                 // todo - extract mechanism that derives from kindOf whether it is about vertical or horizontal distribution
                 const box = distributeGaps(snapToOuter(bboxOptions, snapOptions), snapOptions).innerBox;
 
-                // TODO; configurable paint boxes
-                if (ctx.childrenPath === 'words') {
+                if (ctx.childrenPath === WORDS_TOKEN) {
                   currentGroup.addName(child.content);
 
                   // TODO extract eventListeners
@@ -80,15 +84,25 @@ let render: Plugin = {
                     const outer = currentGroup.findOne('.outer');
                     const { id, name: content } = currentGroup.attrs;
 
-                    const payload = { content, id, box, outer, path: ctx.path, plugin: name };
+                    const payload = { content, id, box, outer, path: ctx.path, plugin: name, raw: get(view, ctx.path) };
                     currentGroup.fire('tokenfocus', { ...event, payload }, true);
                   });
 
+                  const confOpts = confidenceShapeOptions(box, confidence, child.xWconf);
+
+                  if (confidence.konvaOptions.visible) {
+                    const confShape = new Konva.Rect(confOpts);
+                    currentGroup.add(confShape);
+                    Object.assign(box, { height: Math.max(box.height - confOpts.height, 0) });
+                  }
+
                   const outerShape = new Konva.Rect({ ...box, ...options.outer, name: 'outer' });
                   currentGroup.add(outerShape);
+
                   const innerShape = new Konva.Rect(
                     strokeInset({ ...shape.bbox(innerBox), ...options.inner, name: 'box' }),
                   );
+
                   currentGroup.add(innerShape);
                 } else {
                   currentGroup.add(new Konva.Rect({ ...box, name: 'outer' }));

@@ -8,7 +8,7 @@ const right = (options: GapDistributionOptions & SnapToOuterOptions) => {
     return { ...options, innerBox: { ...innerBox, width: innerBox.width + (padding.lineEnd || 0) } };
   }
 
-  const gap = Math.abs(next.x - (innerBox.x + innerBox.width));
+  const gap = Math.abs(next.x - (innerBox.x + innerBox.width)) / 2;
 
   const newInnerBox = { ...innerBox, width: innerBox.width + gap };
   return { ...options, innerBox: newInnerBox };
