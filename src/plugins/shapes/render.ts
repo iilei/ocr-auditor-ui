@@ -1,4 +1,4 @@
-import { name, context, tokens } from './_constants';
+import { context, name, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 import distributeGaps from './distributeGaps';
 import snapToOuter from './snapToOuter';

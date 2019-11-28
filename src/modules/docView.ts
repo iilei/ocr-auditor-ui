@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { get, set, cloneDeep } from 'lodash';
-import { Plugin, Options, Dimensions, PluginSystem } from './types/docView';
-import { sequentially, eachDeep, filterDeep, mapDeep, reduceDeep, shape } from '../util';
+import { cloneDeep, get, set } from 'lodash';
+import { Dimensions, Options, Plugin } from './types/docView';
+import { eachDeep, filterDeep, mapDeep, reduceDeep, sequentially, shape } from '../util';
 
 const noop = async function() {};
 

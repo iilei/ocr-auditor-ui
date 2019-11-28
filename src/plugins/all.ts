@@ -1,4 +1,3 @@
-import { words } from './';
-import { shapes } from './';
+import { shapes, words } from './';
 
 export default [words, shapes];

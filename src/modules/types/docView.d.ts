@@ -1,10 +1,10 @@
 // see https://github.com/swagger-api/swagger-ui/blob/master/docs/customization/plugin-api.md
 // for inspirations
 import Konva from 'konva';
-import { get, set, cloneDeep } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 
 import DocLoader from '../docLoader';
-import { filterDeep, eachDeep, mapDeep, reduceDeep, shape } from '../../util';
+import { eachDeep, filterDeep, mapDeep, reduceDeep, shape } from '../../util';
 
 export interface Plugin {
   context: 'canvas' | 'wrapper';

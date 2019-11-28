@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { name, context, tokens } from './_constants';
+import { context, name, tokens } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 
 // @ts-ignore

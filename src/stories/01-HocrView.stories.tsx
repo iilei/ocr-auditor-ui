@@ -1,6 +1,6 @@
 import React from 'react';
 import { actions } from '@storybook/addon-actions';
-import { withKnobs, object } from '@storybook/addon-knobs';
+import { object, withKnobs } from '@storybook/addon-knobs';
 import HocrView from '../HocrView';
 import componentNotes from '../ocrView.md';
 import pluginOptions from '../plugins/options';

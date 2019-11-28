@@ -1,9 +1,9 @@
-import React, { createRef, Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { DocLoader, DocView } from './modules';
-import { Plugin, Dimensions } from './modules/types/docView';
+import { Dimensions, Plugin } from './modules/types/docView';
 import allPlugins from './plugins/all';
 
 import defaultPluginOptions from './plugins/options';
