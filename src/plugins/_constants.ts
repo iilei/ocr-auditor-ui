@@ -54,7 +54,14 @@ export const renderOptions = {
     snappy: true,
     padding: { left: 12, lineEnd: 12 },
   },
-  outer: { fill: 'turquoise', opacity: 0.06, globalCompositeOperation: 'multiply' },
-  inner: { stroke: 'turquoise', opacity: 0.8, globalCompositeOperation: 'multiply', strokeWidth: 1 },
+  outer: { visible: false },
+  // inner: { stroke: 'turquoise', opacity: 0.8, globalCompositeOperation: 'multiply', strokeWidth: 1 },
+  inner: { visible: false },
   confidence,
+};
+
+export const selectionOptions = {
+  inRange: { opacity: 0.4, fill: '#81d4fa', globalCompositeOperation: 'multiply', visible: true },
+  outOfRange: { opacity: 0.06 },
+  range: ['word_1_1', 'word_1_3'],
 };

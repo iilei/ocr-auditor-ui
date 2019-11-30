@@ -1,3 +1,3 @@
-import { shapes, words } from './';
+import { shapes, words, selection } from './';
 
-export default [words, shapes];
+export default [words, shapes, selection];

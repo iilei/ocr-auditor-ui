@@ -143,7 +143,7 @@ class HocrView extends Component<Props> {
         ref={this.stageRef}
         width={width}
         height={height}
-        onDblClick={this.handleTokenFocus}
+        onDblClick={this.handleTokenFocus} // TODO refactor and `fire('focus.token')`
         onMouseDown={this.props.onMouseDown}
         onMouseUp={this.props.onMouseUp}
         onLoad={this.handleLoad}

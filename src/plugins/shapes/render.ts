@@ -1,4 +1,4 @@
-import { context, name, tokens } from './_constants';
+import { context, name, tokens } from '../_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 import distributeGaps from './distributeGaps';
 import snapToOuter from './snapToOuter';
@@ -47,7 +47,7 @@ let render: Plugin = {
               ctx: Record<string, any>,
             ) => {
               if (ctx.parent) {
-                const currentGroup = new Konva.Group({ id: child.id });
+                const currentGroup = new Konva.Group({ id: child.id, name: ctx.childrenPath });
                 const outerBox = ctx.parent.value.bbox;
                 const innerBox = child.bbox;
                 const bulk = parent[ctx.childrenPath];
@@ -75,16 +75,22 @@ let render: Plugin = {
                 const box = distributeGaps(snapToOuter(bboxOptions, snapOptions), snapOptions).innerBox;
 
                 if (ctx.childrenPath === WORDS_TOKEN) {
-                  currentGroup.addName(child.content);
-
                   // TODO extract eventListeners
                   currentGroup.addEventListener('dblclick mousedown mouseup', (event: MouseEvent) => {
                     event.stopImmediatePropagation();
                     const box = currentGroup.findOne('.box');
                     const outer = currentGroup.findOne('.outer');
-                    const { id, name: content } = currentGroup.attrs;
+                    const { id, name: groupName } = currentGroup.attrs;
 
-                    const payload = { content, id, box, outer, path: ctx.path, plugin: name, raw: get(view, ctx.path) };
+                    const payload = {
+                      name: groupName,
+                      id,
+                      box,
+                      outer,
+                      path: ctx.path,
+                      plugin: name,
+                      raw: get(view, ctx.path),
+                    };
                     Object.assign(event, { payload });
                   });
 
@@ -113,7 +119,7 @@ let render: Plugin = {
 
                 set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: shape.bboxReverse(box) }));
               } else {
-                const currentGroup = new Konva.Group({ id: child.id });
+                const currentGroup = new Konva.Group({ id: child.id, name: ctx.childrenPath });
                 pluginGroup.add(currentGroup);
               }
               return accumulator;
