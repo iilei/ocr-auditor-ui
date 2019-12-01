@@ -54,9 +54,8 @@ export const renderOptions = {
     snappy: true,
     padding: { left: 12, lineEnd: 12 },
   },
-  outer: { visible: false },
-  // inner: { stroke: 'turquoise', opacity: 0.8, globalCompositeOperation: 'multiply', strokeWidth: 1 },
-  inner: { visible: false },
+  outer: { fill: 'turquoise', opacity: 0.0005, globalCompositeOperation: 'multiply', strokeWidth: 0 },
+  // inner: { stroke: 'turquoise', opacity: 0.2, globalCompositeOperation: 'multiply', strokeWidth: 2 },
   confidence,
 };
 

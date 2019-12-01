@@ -5,10 +5,10 @@ const strokeInset = (shape: ShapeOptions & typeof Konva.Shape) => {
   const strokeNew = { ...shape, strokeWidth: strokeWidthEnsured };
   return {
     ...strokeNew,
-    x: x + strokeWidthEnsured,
-    y: y + strokeWidthEnsured,
-    width: Math.abs(width - 2 * strokeWidthEnsured),
-    height: Math.abs(height - 2 * strokeWidthEnsured),
+    x: x + strokeWidthEnsured / 2,
+    y: y + strokeWidthEnsured / 2,
+    width: width - strokeWidthEnsured,
+    height: height - strokeWidthEnsured,
   };
 };
 export default strokeInset;

@@ -1,19 +1,63 @@
 import React from 'react';
 import { actions } from '@storybook/addon-actions';
-import { object, withKnobs } from '@storybook/addon-knobs';
+import { object, withKnobs, button, array } from '@storybook/addon-knobs';
 import HocrView from '../HocrView';
+import Snapshot from '../Snapshot';
+import DocumentLoader from '../DocumentLoader';
 import componentNotes from '../ocrView.md';
 import pluginOptions from '../plugins/options';
 
 export default {
-  component: HocrView,
   title: 'Hocr View',
   parameters: { notes: componentNotes },
   decorators: [withKnobs],
 };
 
+const stripeImg =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAKElEQVQImWNk+K/FwMDw//U1BgYGJjiLUVSL8f8rBggLKgNh/X99DQBTKAwZprW6SAAAAABJRU5ErkJggg==';
+
 const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized', 'onMouseDown', 'onMouseUp');
 
-export const phototestPage1 = () => (
-  <HocrView {...eventsFromObject} id="phototest" page={1} pluginOptions={object('Plugin Options', pluginOptions)} />
-);
+export const optionsObject = () => {
+  return (
+    <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)}>
+      <DocumentLoader url="./phototest.json" page={1} />
+    </HocrView>
+  );
+};
+
+const debug = React.createRef<HTMLPreElement>();
+const debugImg = React.createRef<HTMLImageElement>();
+
+export const snapshotComponent = () => {
+  const onReady = (snapshot: string) => {
+    const { current: pre } = debug;
+    const { current: image } = debugImg;
+
+    if (pre) {
+      pre.innerText = JSON.stringify(snapshot);
+    }
+
+    if (image) {
+      image.src = snapshot;
+    }
+
+    return true;
+  };
+
+  const value = array('Snapshot of Range', ['word_1_23', 'word_1_28']);
+
+  return (
+    <>
+      <div style={{ display: 'none' }}>
+        <HocrView {...eventsFromObject}>
+          <DocumentLoader url="./phototest.json" page={1} />
+          <Snapshot range={value} onReady={onReady} />
+        </HocrView>
+      </div>
+      <h3 style={{ font: 'menu', fontSize: 24, fontWeight: 'bold' }}>onReady yields:</h3>
+      <img ref={debugImg} style={{ padding: 4, backgroundImage: `url("${stripeImg}")` }} />
+      <pre ref={debug} />
+    </>
+  );
+};

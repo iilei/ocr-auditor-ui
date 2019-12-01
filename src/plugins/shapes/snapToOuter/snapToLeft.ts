@@ -9,6 +9,7 @@ const snapToLeft = (options: GapDistributionOptions & SnapToOuterOptions) => {
 
   if (!prev || (kindOf !== 'words' && snappy)) {
     const padLeft = Math.abs(outerBox.x - innerBox.x);
+
     return {
       ...options,
       innerBox: { ...innerBox, x: innerBox.x - padLeft + offset, width: innerBox.width + padLeft - offset },

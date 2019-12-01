@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { cloneDeep, get, set } from 'lodash';
 import { Dimensions, Options, Plugin } from './types/docView';
-import { eachDeep, filterDeep, mapDeep, reduceDeep, sequentially, shape } from '../util';
+import { eachDeep, filterDeep, mapDeep, reduceDeep, sequentially, shape, validateRange } from '../util';
 
 const noop = async function() {};
 
 class DocView {
-  _view: Record<'image', string>;
+  _view: Record<'ppageno' | 'id', string | number> & Record<string, any> & Record<'image', string>;
   _stage: Konva.Stage;
   _root: Konva.Layer;
   _img: Konva.Group;
@@ -28,11 +28,13 @@ class DocView {
     this._plugins = plugins.filter(plugin => plugin.context === 'canvas');
     const baseState = { plugins: { words: { views: [] } } };
     this.state = Object.assign(baseState, { plugins: { ...baseState.plugins, ...pluginOptions } });
+
     return this;
   }
 
   init = async () => {
     this.clear();
+    // TOD fallback?
     const imgLoader = await this.loadImage(this._view.image);
     await this.pluginQueue();
     this._root.fire('initialized', this.state, true);
@@ -56,6 +58,7 @@ class DocView {
       get,
       sequentially,
       getState: () => this.state.plugins[name],
+      validateRange: validateRange(() => this.words),
     },
   });
 
@@ -84,6 +87,11 @@ class DocView {
 
     return sequentially(promises);
   };
+
+  get words() {
+    const { views } = this.state.plugins.words;
+    return views || [];
+  }
 
   private loadImage = (url: string) => {
     const imageObj = new Image();

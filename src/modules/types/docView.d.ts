@@ -7,6 +7,7 @@ import DocLoader from '../docLoader';
 import { eachDeep, filterDeep, mapDeep, reduceDeep, shape } from '../../util';
 
 export interface Plugin {
+  get: (range: Array<string>, cb: Function) => unknown;
   context: 'canvas' | 'wrapper';
   name: string;
   fn: PluginPromiseFactory;
@@ -30,6 +31,7 @@ export interface PluginSystem {
     cloneDeep: typeof cloneDeep;
     sequentially: (promises: Array<Promise>) => void;
     getState: () => Record<string, any>;
+    validateRange: (words: Array<string>) => boolean;
   };
   Konva: Konva;
 }
@@ -38,7 +40,7 @@ export type PluginPromiseFactory = (pluginSystem: PluginSystem) => (options: Rec
 
 export interface Options {
   stageNode: Konva.Stage;
-  doc: DocLoader;
+  doc: Record<string, any>;
   plugins: Array<Plugin>;
 }
 

@@ -5,7 +5,7 @@ const left = (options: GapDistributionOptions & SnapToOuterOptions) => {
     return options;
   }
   // the gap side which is adjusted first politely only takes half the gap space
-  const gap = Math.abs(prev.x + prev.width - innerBox.x);
+  const gap = Math.floor(Math.abs(prev.x + prev.width - innerBox.x));
 
   const newInnerBox = { ...innerBox, width: innerBox.width + gap, x: innerBox.x - gap };
   return { ...options, innerBox: newInnerBox };

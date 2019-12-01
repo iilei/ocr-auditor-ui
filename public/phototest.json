@@ -72,7 +72,7 @@
                       ],
                       "content": "This",
                       "id": "word_1_1",
-                      "xWconf": 0
+                      "xWconf": 60
                     },
                     {
                       "bbox": [
@@ -102,7 +102,7 @@
                       ],
                       "content": "a",
                       "id": "word_1_3",
-                      "xWconf": 10
+                      "xWconf": 90
                     },
                     {
                       "bbox": [
@@ -132,7 +132,7 @@
                       ],
                       "content": "of",
                       "id": "word_1_5",
-                      "xWconf": 20
+                      "xWconf": 90
                     },
                     {
                       "bbox": [
@@ -147,7 +147,7 @@
                       ],
                       "content": "12",
                       "id": "word_1_6",
-                      "xWconf": 25
+                      "xWconf": 12
                     },
                     {
                       "bbox": [
@@ -162,7 +162,7 @@
                       ],
                       "content": "point",
                       "id": "word_1_7",
-                      "xWconf": 30
+                      "xWconf": 90
                     },
                     {
                       "bbox": [
@@ -192,7 +192,7 @@
                       ],
                       "content": "to",
                       "id": "word_1_9",
-                      "xWconf": 40
+                      "xWconf": 70
                     },
                     {
                       "bbox": [

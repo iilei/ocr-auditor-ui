@@ -1,4 +1,4 @@
-import React, { Component, createRef } from 'react';
+import React, { Component, createRef, Children } from 'react';
 import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
@@ -23,7 +23,7 @@ export interface TokenFocusEvent {
 }
 
 export interface Props extends KonvaNodeEvents, StageProps, KeyboardEvents, LoadEvent, TokenFocusEvent {
-  id: string;
+  id?: string;
   page?: number | string;
   plugins?: Array<Plugin>;
 }
@@ -39,8 +39,6 @@ interface Cancelable {
 
 class HocrView extends Component<Props> {
   readonly stageRef = createRef<Stage>();
-  readonly docLoader: DocLoader;
-  docView: DocView | undefined;
   onDblClick: Function;
   onClick: Function;
   onKeyPress: Function;
@@ -50,6 +48,7 @@ class HocrView extends Component<Props> {
   onInitialized: Function;
   onTokenfocus: Function;
   plugins: Array<Plugin>;
+  docView?: DocView;
 
   state = {
     width: 0,
@@ -85,37 +84,8 @@ class HocrView extends Component<Props> {
     this.onMouseDown = onMouseDown;
     this.onInitialized = onInitialized;
     this.onTokenfocus = onTokenfocus;
-    this.docLoader = new DocLoader(`/${id}.json`, String(page));
     this.stageRef = { current: null };
     this.plugins = plugins;
-  }
-
-  componentDidMount() {
-    const node = this.stageRef.current;
-
-    if (node) {
-      this.docLoader.get().then(
-        async view => {
-          this.docView = new DocView({
-            stageNode: node.getStage(),
-            doc: this.docLoader,
-            plugins: this.plugins,
-            pluginOptions: this.props.pluginOptions || defaultPluginOptions,
-          });
-          await this.docView.init();
-          // TODO: refactor and use onLoad Event handler instead
-          const image: Konva.Image = this.docView.image!;
-          this.resize({ height: image.getHeight(), width: image.getWidth() });
-
-          this.componentDidUpdate = (prevProps: Record<string, any>) => {
-            if (!isEqual(this.props.pluginOptions, prevProps.pluginOptions)) {
-              this.docView!.setState({ plugins: this.props.pluginOptions });
-            }
-          };
-        },
-        error => {},
-      );
-    }
   }
 
   resize = ({ width, height }: Dimensions) => {
@@ -134,22 +104,84 @@ class HocrView extends Component<Props> {
     this.onInitialized(event);
   };
 
+  onDocumentLoaded = async (doc: DocView['_view']) => {
+    const node = this.stageRef.current;
+    const { ppageno: page, id } = doc;
+    // @ts-ignore
+    const { page: _page, id: _id } = this.state;
+    if (_id === id && _page === page) {
+      return;
+    }
+    this.setState({ page, id });
+
+    if (node) {
+      this.docView = new DocView({
+        stageNode: node.getStage(),
+        doc: { view: doc },
+        plugins: this.plugins,
+        pluginOptions: this.props.pluginOptions || defaultPluginOptions,
+      });
+
+      // @ts-ignore
+      await this.docView.init();
+
+      // TODO: refactor and use onLoad Event handler instead
+      // @ts-ignore
+      if (this.docView.image) {
+        // @ts-ignore
+        const image: Konva.Image = this.docView.image!;
+        this.resize({ height: image.getHeight(), width: image.getWidth() });
+
+        this.componentDidUpdate = (prevProps: Record<string, any>) => {
+          if (!isEqual(this.props.pluginOptions, prevProps.pluginOptions)) {
+            // @ts-ignore
+            this.docView.setState({ plugins: this.props.pluginOptions });
+          }
+        };
+      }
+    }
+  };
+
   render() {
     const { width, height } = this.state;
+    const { children } = this.props;
 
     return (
-      <Stage
-        tabIndex={1}
-        ref={this.stageRef}
-        width={width}
-        height={height}
-        onDblClick={this.handleTokenFocus} // TODO refactor and `fire('focus.token')`
-        onMouseDown={this.props.onMouseDown}
-        onMouseUp={this.props.onMouseUp}
-        onLoad={this.handleLoad}
-        onInitialized={this.handleInitialized}
-        pluginOptions={this.props.pluginOptions || defaultPluginOptions}
-      />
+      <>
+        <Stage
+          tabIndex={1}
+          ref={this.stageRef}
+          width={width}
+          height={height}
+          onDblClick={this.handleTokenFocus} // TODO refactor and `fire('focus.token')`
+          onMouseDown={this.props.onMouseDown}
+          onMouseUp={this.props.onMouseUp}
+          onLoad={this.handleLoad}
+          onInitialized={this.handleInitialized}
+          pluginOptions={this.props.pluginOptions || defaultPluginOptions}
+        />
+        {Children.map(children, child => {
+          // @ts-ignore
+          const coercedChild = <>{child}</>;
+          // @ts-ignore
+          if (child.type.displayName === 'DocumentLoader') {
+            // @ts-ignore
+            return React.cloneElement(child, {
+              // @ts-ignore
+              url: child.props.url,
+              // @ts-ignore
+              page: child.props.page,
+              onDocumentLoaded: this.onDocumentLoaded,
+            });
+          } else if (this.docView && this.docView._plugins) {
+            // @ts-ignore
+            return React.cloneElement(child, {
+              docView: this.docView,
+              ...coercedChild.props,
+            });
+          }
+        })}
+      </>
     );
   }
 }

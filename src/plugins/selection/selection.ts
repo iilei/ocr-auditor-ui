@@ -35,7 +35,6 @@ let selection: Plugin = {
 
       const result: Array<string> = [];
 
-      // reduce?
       eachDeep(
         view,
         (
