@@ -20,9 +20,11 @@ const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized', 'onM
 
 export const optionsObject = () => {
   return (
-    <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)}>
-      <DocumentLoader url="./phototest.json" page={1} />
-    </HocrView>
+    <div style={{ display: 'inline-block', padding: 4, backgroundImage: `url("${stripeImg}")` }}>
+      <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)}>
+        <DocumentLoader url="./phototest.json" page={1} />
+      </HocrView>
+    </div>
   );
 };
 
@@ -45,7 +47,7 @@ export const snapshotComponent = () => {
     return true;
   };
 
-  const value = array('Snapshot of Range', ['word_1_23', 'word_1_28']);
+  const value = array('Snapshot of Range', 'word_1_52,word_1_60'.split(','));
 
   return (
     <>
