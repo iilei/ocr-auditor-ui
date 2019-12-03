@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 import DocLoader from './modules/docLoader';
-import { flatten, isEqual } from 'lodash';
-import allPlugins from './plugins/all';
 import { DocView } from './modules';
-import defaultPluginOptions from './plugins/options';
-import Konva from 'konva';
 
 export type Props = {
   url: string;
@@ -13,6 +9,8 @@ export type Props = {
 };
 
 class DocumentLoader extends Component<Props> {
+  static displayName = 'DocumentLoader';
+
   onDocumentLoaded: (view: DocView) => {};
   docView: DocView | undefined;
   docLoader: DocLoader;
@@ -39,8 +37,6 @@ class DocumentLoader extends Component<Props> {
   }
 
   initializeDocument = () => {
-    const { url, page = 1 } = this.props;
-
     this.docLoader.get().then(this.onDocumentLoaded);
   };
 

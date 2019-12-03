@@ -20,8 +20,6 @@ let selection: Plugin = {
       fn: { eachDeep },
     } = pluginSystem;
 
-    const boundaryNodes: Array<Konva.Node> = [];
-
     selection.init = (options: Options) => {
       const nodes: Array<Konva.Node> = [];
       const { range, inRange, outOfRange } = options;

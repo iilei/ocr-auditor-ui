@@ -5,12 +5,8 @@ const DIGITS_ONLY = /^\d+$/;
 const isStrictlyInt = (str: string): boolean => DIGITS_ONLY.test(str);
 
 class DocLoader {
-  _doc: string;
   _document: Record<string, any> & { pages: Array<Record<string, any>> };
-  _page: string;
   _ready: boolean;
-  _record: Record<string, any>;
-  _view: Record<string, any>;
 
   constructor(doc: string, page: string) {
     this._doc = doc;
@@ -21,6 +17,38 @@ class DocLoader {
     this._view = {};
 
     return this;
+  }
+
+  _doc: string;
+
+  get doc() {
+    return this._doc;
+  }
+
+  set doc(doc: string) {
+    this._doc = doc;
+  }
+
+  _page: string;
+
+  get page() {
+    return this._page;
+  }
+
+  set page(page: string) {
+    this._page = page;
+  }
+
+  _record: Record<string, any>;
+
+  get record() {
+    return this._record;
+  }
+
+  _view: Record<string, any>;
+
+  get view() {
+    return this._view;
   }
 
   get = (doc = this._doc, page = this._page): Promise<any> => {
@@ -53,30 +81,6 @@ class DocLoader {
         throw Error(err);
       });
   };
-
-  get record() {
-    return this._record;
-  }
-
-  get doc() {
-    return this._doc;
-  }
-
-  set doc(doc: string) {
-    this._doc = doc;
-  }
-
-  get page() {
-    return this._page;
-  }
-
-  set page(page: string) {
-    this._page = page;
-  }
-
-  get view() {
-    return this._view;
-  }
 }
 
 export default DocLoader;

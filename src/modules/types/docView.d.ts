@@ -2,8 +2,6 @@
 // for inspirations
 import Konva from 'konva';
 import { cloneDeep, get, set } from 'lodash';
-
-import DocLoader from '../docLoader';
 import { eachDeep, filterDeep, mapDeep, reduceDeep, shape } from '../../util';
 
 export interface Plugin {

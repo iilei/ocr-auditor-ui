@@ -117,7 +117,14 @@ let render: Plugin = {
                 const parentGroup: typeof Konva.Group = root.findOne(`#${ctx.parent.value.id}`);
                 parentGroup.add(currentGroup);
 
-                set(accumulator, ctx.path, Object.assign(child, { ...child, bbox: shape.bboxReverse(box) }));
+                set(
+                  accumulator,
+                  ctx.path,
+                  Object.assign(child, {
+                    ...child,
+                    bbox: shape.bboxReverse(box),
+                  }),
+                );
               } else {
                 const currentGroup = new Konva.Group({ id: child.id, name: ctx.childrenPath });
                 pluginGroup.add(currentGroup);

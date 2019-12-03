@@ -1,8 +1,8 @@
-import React, { Component, createRef, Children } from 'react';
+import React, { Children, Component, createRef } from 'react';
 import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
-import { DocLoader, DocView } from './modules';
+import { DocView } from './modules';
 import { Dimensions, Plugin } from './modules/types/docView';
 import allPlugins from './plugins/all';
 
@@ -63,8 +63,6 @@ class HocrView extends Component<Props> {
     const noop = (): any => null;
 
     const {
-      id,
-      page = 1,
       plugins = flatten(allPlugins),
       onClick = noop,
       onKeyPress = noop,
@@ -161,6 +159,7 @@ class HocrView extends Component<Props> {
           pluginOptions={this.props.pluginOptions || defaultPluginOptions}
         />
         {Children.map(children, child => {
+          debugger;
           // @ts-ignore
           const coercedChild = <>{child}</>;
           // @ts-ignore

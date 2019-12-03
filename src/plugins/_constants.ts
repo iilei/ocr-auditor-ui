@@ -54,7 +54,12 @@ export const renderOptions = {
     snappy: true,
     padding: { left: 12, lineEnd: 12 },
   },
-  outer: { fill: 'turquoise', opacity: 0.0005, globalCompositeOperation: 'multiply', strokeWidth: 0 },
+  outer: {
+    fill: 'turquoise',
+    opacity: 0.0005,
+    globalCompositeOperation: 'multiply',
+    strokeWidth: 0,
+  },
   // inner: { stroke: 'turquoise', opacity: 0.2, globalCompositeOperation: 'multiply', strokeWidth: 2 },
   confidence,
 };

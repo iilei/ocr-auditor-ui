@@ -3,6 +3,7 @@ import { Component } from 'react';
 export type Props = { range: Array<string>; onReady: (snapshot: string) => void; docView?: any };
 
 class Snapshot extends Component<Props> {
+  static displayName = 'Snapshot';
   _Snapshot: { get: Function };
 
   constructor(props: Readonly<Props>) {
@@ -25,7 +26,7 @@ class Snapshot extends Component<Props> {
 
   async getSnapshot() {
     const { range } = this.props;
-    const snap = this._Snapshot.get(range, this.props.onReady);
+    this._Snapshot.get(range, this.props.onReady);
   }
 
   rangeDiffers = (a?: [string?, string?], b?: [string?, string?]) => {

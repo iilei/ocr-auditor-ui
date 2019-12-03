@@ -2,6 +2,7 @@ import { context, name } from './_constants';
 import { Plugin, PluginSystem } from '../../modules/types/docView';
 import Konva from 'konva';
 import { tokens } from '../_constants';
+
 const WORDS_TOKEN = tokens[tokens.length - 1];
 
 export type Options = { range: [string]; inRange: Konva.ShapeConfig; outOfRange: Konva.ShapeConfig };
@@ -25,7 +26,10 @@ let snapshot: Plugin = {
     snapshot.get = (range: Array<string>, cb: Function) => {
       const shapeGroup = stage.findOne('#shapes');
 
-      const pluginGroup = new Konva.Group({ id: name, globalCompositeOperation: 'destination-atop' });
+      const pluginGroup = new Konva.Group({
+        id: name,
+        globalCompositeOperation: 'destination-atop',
+      });
 
       const ids = [...range];
 
@@ -79,7 +83,12 @@ let snapshot: Plugin = {
       inverse.cache();
 
       const inverseGroup = new Konva.Group({ globalCompositeOperation: 'source-over' });
-      const inverseMask = new Konva.Rect({ ...dimensions, fill: 'white', opacity: 1, visible: true });
+      const inverseMask = new Konva.Rect({
+        ...dimensions,
+        fill: 'white',
+        opacity: 1,
+        visible: true,
+      });
 
       inverseGroup.add(inverseMask);
       inverseGroup.add(inverse);

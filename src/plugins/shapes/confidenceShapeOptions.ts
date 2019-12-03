@@ -18,7 +18,12 @@ const confidenceShapeOptions = (
   // @ts-ignore
   const rangeSpecificOptions: Record<string, any> = findByRange(rangeOptions, confidence);
 
-  return { ...konvaOptions, ...dimensions, ...rangeSpecificOptions.konvaOptions, name: 'confidence' };
+  return {
+    ...konvaOptions,
+    ...dimensions,
+    ...rangeSpecificOptions.konvaOptions,
+    name: 'confidence',
+  };
 };
 
 export { confidenceShapeOptions };

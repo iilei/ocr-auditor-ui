@@ -1,6 +1,6 @@
 import React from 'react';
 import { actions } from '@storybook/addon-actions';
-import { object, withKnobs, button, array } from '@storybook/addon-knobs';
+import { array, object, withKnobs } from '@storybook/addon-knobs';
 import HocrView from '../HocrView';
 import Snapshot from '../Snapshot';
 import DocumentLoader from '../DocumentLoader';
@@ -58,7 +58,7 @@ export const snapshotComponent = () => {
         </HocrView>
       </div>
       <h3 style={{ font: 'menu', fontSize: 24, fontWeight: 'bold' }}>onReady yields:</h3>
-      <img ref={debugImg} style={{ padding: 4, backgroundImage: `url("${stripeImg}")` }} />
+      <img alt="" ref={debugImg} style={{ padding: 4, backgroundImage: `url("${stripeImg}")` }} />
       <pre ref={debug} />
     </>
   );

@@ -32,6 +32,20 @@ class DocView {
     return this;
   }
 
+  get words() {
+    const { views } = this.state.plugins.words;
+    return views || [];
+  }
+
+  get image(): Konva.Image {
+    const img = this._img.findOne<Konva.Image>('Image');
+    if (!img) {
+      return new Konva.Image();
+    }
+
+    return img!;
+  }
+
   init = async () => {
     this.clear();
     // TOD fallback?
@@ -69,7 +83,12 @@ class DocView {
         return plugin
           .fn(this.pluginOptions(plugin.name))(this.state.plugins[plugin.name] || {})
           .then(result => {
-            Object.assign(this.state, { plugins: { ...this.state.plugins, [plugin.name]: result } });
+            Object.assign(this.state, {
+              plugins: {
+                ...this.state.plugins,
+                [plugin.name]: result,
+              },
+            });
           });
       }),
     );
@@ -87,11 +106,6 @@ class DocView {
 
     return sequentially(promises);
   };
-
-  get words() {
-    const { views } = this.state.plugins.words;
-    return views || [];
-  }
 
   private loadImage = (url: string) => {
     const imageObj = new Image();
@@ -123,15 +137,6 @@ class DocView {
       imageObj.src = url;
     });
   };
-
-  get image(): Konva.Image {
-    const img = this._img.findOne<Konva.Image>('Image');
-    if (!img) {
-      return new Konva.Image();
-    }
-
-    return img!;
-  }
 }
 
 export default DocView;

@@ -12,7 +12,11 @@ const snapToLeft = (options: GapDistributionOptions & SnapToOuterOptions) => {
 
     return {
       ...options,
-      innerBox: { ...innerBox, x: innerBox.x - padLeft + offset, width: innerBox.width + padLeft - offset },
+      innerBox: {
+        ...innerBox,
+        x: innerBox.x - padLeft + offset,
+        width: innerBox.width + padLeft - offset,
+      },
     };
   }
   return options;
