@@ -3,6 +3,7 @@ import { KonvaNodeEvents, Stage, StageProps } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { DocView } from './modules';
+import { Document } from './DocumentLoader';
 import { Dimensions, Plugin } from './modules/types/docView';
 import allPlugins from './plugins/all';
 
@@ -23,18 +24,8 @@ export interface TokenFocusEvent {
 }
 
 export interface Props extends KonvaNodeEvents, StageProps, KeyboardEvents, LoadEvent, TokenFocusEvent {
-  id?: string;
-  page?: number | string;
+  view?: Document;
   plugins?: Array<Plugin>;
-}
-
-export interface OCRPayload {
-  id: string;
-  name: string;
-}
-
-interface Cancelable {
-  cancel(): void;
 }
 
 class HocrView extends Component<Props> {
@@ -53,8 +44,7 @@ class HocrView extends Component<Props> {
   state = {
     width: 0,
     height: 0,
-    activeFontFamily: '',
-    showConfidence: true,
+    docViewReady: false,
   };
 
   constructor(props: Props) {
@@ -86,6 +76,10 @@ class HocrView extends Component<Props> {
     this.plugins = plugins;
   }
 
+  async componentDidMount() {
+    await this.initialize();
+  }
+
   resize = ({ width, height }: Dimensions) => {
     this.setState({ width, height });
   };
@@ -102,9 +96,14 @@ class HocrView extends Component<Props> {
     this.onInitialized(event);
   };
 
-  onDocumentLoaded = async (doc: DocView['_view']) => {
+  initialize = async () => {
+    const { view } = this.props;
     const node = this.stageRef.current;
-    const { ppageno: page, id } = doc;
+    if (!view) {
+      return null;
+    }
+
+    const { ppageno: page, id } = view;
     // @ts-ignore
     const { page: _page, id: _id } = this.state;
     if (_id === id && _page === page) {
@@ -115,19 +114,19 @@ class HocrView extends Component<Props> {
     if (node) {
       this.docView = new DocView({
         stageNode: node.getStage(),
-        doc: { view: doc },
+        doc: { view },
         plugins: this.plugins,
         pluginOptions: this.props.pluginOptions || defaultPluginOptions,
       });
 
       // @ts-ignore
       await this.docView.init();
+      this.setState({ docViewReady: true });
 
       // TODO: refactor and use onLoad Event handler instead
       // @ts-ignore
       if (this.docView.image) {
-        // @ts-ignore
-        const image: Konva.Image = this.docView.image!;
+        const image: Konva.Image = this.docView.image;
         this.resize({ height: image.getHeight(), width: image.getWidth() });
 
         this.componentDidUpdate = (prevProps: Record<string, any>) => {
@@ -141,8 +140,12 @@ class HocrView extends Component<Props> {
   };
 
   render() {
-    const { width, height } = this.state;
+    const { width, height, docViewReady } = this.state;
     const { children } = this.props;
+
+    if (!this.props.view) {
+      return <></>;
+    }
 
     return (
       <>
@@ -159,26 +162,13 @@ class HocrView extends Component<Props> {
           pluginOptions={this.props.pluginOptions || defaultPluginOptions}
         />
         {Children.map(children, child => {
-          debugger;
           // @ts-ignore
-          const coercedChild = <>{child}</>;
-          // @ts-ignore
-          if (child.type.displayName === 'DocumentLoader') {
+          return React.cloneElement(child, {
+            docView: docViewReady ? this.docView : null,
+            view: this.props.view,
             // @ts-ignore
-            return React.cloneElement(child, {
-              // @ts-ignore
-              url: child.props.url,
-              // @ts-ignore
-              page: child.props.page,
-              onDocumentLoaded: this.onDocumentLoaded,
-            });
-          } else if (this.docView && this.docView._plugins) {
-            // @ts-ignore
-            return React.cloneElement(child, {
-              docView: this.docView,
-              ...coercedChild.props,
-            });
-          }
+            ...child.props,
+          });
         })}
       </>
     );

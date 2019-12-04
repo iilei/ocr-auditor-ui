@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Children, Component } from 'react';
 import DocLoader from './modules/docLoader';
 import { DocView } from './modules';
 
@@ -8,21 +8,24 @@ export type Props = {
   onDocumentLoaded?: (view: DocView) => {};
 };
 
+export type Document = {
+  id: number | string;
+  ppageno: number | string;
+  [other: string]: any;
+};
+
 class DocumentLoader extends Component<Props> {
   static displayName = 'DocumentLoader';
-
-  onDocumentLoaded: (view: DocView) => {};
   docView: DocView | undefined;
   docLoader: DocLoader;
+
+  state: { view?: Document } & Record<string, any> = {};
 
   constructor(props: Props) {
     super(props);
 
-    const noop = (): any => null;
+    const { url, page = 1 } = props;
 
-    const { url, page = 1, onDocumentLoaded = noop } = props;
-
-    this.onDocumentLoaded = onDocumentLoaded;
     this.docLoader = new DocLoader(url, String(page));
   }
 
@@ -40,8 +43,27 @@ class DocumentLoader extends Component<Props> {
     this.docLoader.get().then(this.onDocumentLoaded);
   };
 
+  onDocumentLoaded = async (doc: DocView['_view']) => {
+    this.setState({ view: doc });
+  };
+
   render() {
-    return <></>;
+    const { children } = this.props;
+    if (!this.state.view) {
+      return <></>;
+    }
+    return (
+      <>
+        {Children.map(children, child => {
+          // @ts-ignore
+          return React.cloneElement(child, {
+            view: this.state.view,
+            // @ts-ignore
+            ...child.props,
+          });
+        })}
+      </>
+    );
   }
 }
 

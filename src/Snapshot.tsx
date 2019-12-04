@@ -4,29 +4,36 @@ export type Props = { range: Array<string>; onReady: (snapshot: string) => void;
 
 class Snapshot extends Component<Props> {
   static displayName = 'Snapshot';
-  _Snapshot: { get: Function };
-
-  constructor(props: Readonly<Props>) {
-    super(props);
-    this._Snapshot = props.docView._plugins.find((p: Record<string, any>) => p.name === 'snapshot');
-  }
+  private _getSnapshot: Function | undefined;
 
   componentDidMount(): void {
-    if (this.props.range.length) {
-      this.getSnapshot();
-    }
+    this.bindSnapshotGetter();
+    this.getSnapshot().then();
   }
 
-  componentDidUpdate(prevProps: { range: Array<string> }): void {
+  bindSnapshotGetter = () => {
+    if (this.props.docView && this.props.docView._plugins) {
+      this._getSnapshot = this.props.docView._plugins.find((p: Record<string, any>) => p.name === 'snapshot').get;
+    }
+  };
+
+  componentDidUpdate(prevProps: Props): void {
+    if (!prevProps.docView || !prevProps.docView._plugins) {
+      this.bindSnapshotGetter();
+      this.getSnapshot().then();
+    }
+
     // @ts-ignore
     if (this.props.range.length && this.rangeDiffers(prevProps.range, this.props.range)) {
-      this.getSnapshot();
+      this.getSnapshot().then();
     }
   }
 
   async getSnapshot() {
-    const { range } = this.props;
-    this._Snapshot.get(range, this.props.onReady);
+    const { range, onReady = () => null } = this.props;
+    if (range.length && this._getSnapshot) {
+      this._getSnapshot(range, onReady);
+    }
   }
 
   rangeDiffers = (a?: [string?, string?], b?: [string?, string?]) => {
@@ -36,7 +43,7 @@ class Snapshot extends Component<Props> {
   };
 
   render() {
-    return '';
+    return null;
   }
 }
 

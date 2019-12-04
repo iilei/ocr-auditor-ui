@@ -5,9 +5,9 @@ import DocumentLoader from './DocumentLoader';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-  <HocrView>
-    <DocumentLoader url="/phototest.json" page={1} />
-  </HocrView>,
+  <DocumentLoader url="/phototest.json" page={1}>
+    <HocrView />
+  </DocumentLoader>,
   document.getElementById('root'),
 );
 

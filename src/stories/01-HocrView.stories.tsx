@@ -21,9 +21,9 @@ const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized', 'onM
 export const optionsObject = () => {
   return (
     <div style={{ display: 'inline-block', padding: 4, backgroundImage: `url("${stripeImg}")` }}>
-      <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)}>
-        <DocumentLoader url="./phototest.json" page={1} />
-      </HocrView>
+      <DocumentLoader url="./phototest.json" page={1}>
+        <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)} />
+      </DocumentLoader>
     </div>
   );
 };
@@ -52,10 +52,11 @@ export const snapshotComponent = () => {
   return (
     <>
       <div style={{ display: 'none' }}>
-        <HocrView {...eventsFromObject}>
-          <DocumentLoader url="./phototest.json" page={1} />
-          <Snapshot range={value} onReady={onReady} />
-        </HocrView>
+        <DocumentLoader url="./phototest.json" page={1}>
+          <HocrView {...eventsFromObject}>
+            <Snapshot range={value} onReady={onReady} />
+          </HocrView>
+        </DocumentLoader>
       </div>
       <h3 style={{ font: 'menu', fontSize: 24, fontWeight: 'bold' }}>onReady yields:</h3>
       <img alt="" ref={debugImg} style={{ padding: 4, backgroundImage: `url("${stripeImg}")` }} />
