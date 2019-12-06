@@ -16,12 +16,12 @@ export default {
 const stripeImg =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAKElEQVQImWNk+K/FwMDw//U1BgYGJjiLUVSL8f8rBggLKgNh/X99DQBTKAwZprW6SAAAAABJRU5ErkJggg==';
 
-const eventsFromObject = actions('onLoad', 'onTokenfocus', 'onInitialized', 'onMouseDown', 'onMouseUp');
+const eventsFromObject = actions('onLoad', 'onMouseDown', 'onMouseUp');
 
 export const optionsObject = () => {
   return (
     <div style={{ display: 'inline-block', padding: 4, backgroundImage: `url("${stripeImg}")` }}>
-      <DocumentLoader url="./phototest.json" page={1}>
+      <DocumentLoader url="./phototest.json" page={1} {...eventsFromObject}>
         <HocrView {...eventsFromObject} pluginOptions={object('Plugin Options', pluginOptions)} />
       </DocumentLoader>
     </div>
@@ -52,7 +52,7 @@ export const snapshotComponent = () => {
   return (
     <>
       <div style={{ display: 'none' }}>
-        <DocumentLoader url="./phototest.json" page={1}>
+        <DocumentLoader url="./phototest.json" page={1} {...eventsFromObject}>
           <HocrView {...eventsFromObject}>
             <Snapshot range={value} onReady={onReady} />
           </HocrView>

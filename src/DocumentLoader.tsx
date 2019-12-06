@@ -1,11 +1,11 @@
-import React, { Children, Component } from 'react';
+import React, { Children, Component, createRef } from 'react';
 import DocLoader from './modules/docLoader';
 import { DocView } from './modules';
 
 export type Props = {
   url: string;
   page: number | string;
-  onDocumentLoaded?: (view: DocView) => {};
+  onLoad?: (view: DocView['_view']) => unknown;
 };
 
 export type Document = {
@@ -14,10 +14,13 @@ export type Document = {
   [other: string]: any;
 };
 
+const noop = () => null;
+
 class DocumentLoader extends Component<Props> {
   static displayName = 'DocumentLoader';
   docView: DocView | undefined;
   docLoader: DocLoader;
+  wrapperRef = createRef<HTMLDivElement>();
 
   state: { view?: Document } & Record<string, any> = {};
 
@@ -36,15 +39,17 @@ class DocumentLoader extends Component<Props> {
   componentDidUpdate(prevProps: Props) {
     this.docLoader.page = String(this.props.page);
     this.docLoader.doc = String(this.props.url);
-    this.initializeDocument();
+    // TODO - compare prevProps
+    // this.initializeDocument();
   }
 
   initializeDocument = () => {
     this.docLoader.get().then(this.onDocumentLoaded);
   };
 
-  onDocumentLoaded = async (doc: DocView['_view']) => {
-    this.setState({ view: doc });
+  onDocumentLoaded = async (view: DocView['_view']) => {
+    this.setState({ view });
+    this.props.onLoad && this.props.onLoad(view);
   };
 
   render() {
@@ -53,7 +58,7 @@ class DocumentLoader extends Component<Props> {
       return <></>;
     }
     return (
-      <>
+      <div ref={this.wrapperRef}>
         {Children.map(children, child => {
           // @ts-ignore
           return React.cloneElement(child, {
@@ -62,7 +67,7 @@ class DocumentLoader extends Component<Props> {
             ...child.props,
           });
         })}
-      </>
+      </div>
     );
   }
 }
