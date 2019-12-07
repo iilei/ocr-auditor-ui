@@ -14,8 +14,6 @@ export type Document = {
   [other: string]: any;
 };
 
-const noop = () => null;
-
 class DocumentLoader extends Component<Props> {
   static displayName = 'DocumentLoader';
   docView: DocView | undefined;

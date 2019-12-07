@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "outDir": "lib",
+    "rootDir": "src",
+    "target": "es5",
+    "module": "commonjs",
     "lib": [
       "dom",
       "dom.iterable",
@@ -10,20 +13,21 @@
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "declaration": true,
+    "sourceMap": true,
     "jsx": "react",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "removeComments": true
   },
   "include": [
     "src"
   ],
   "files": [
-    "types.d.ts",
+    "src/types.d.ts",
     "node_modules/konva/types/index.d.ts"
   ]
 }

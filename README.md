@@ -1,16 +1,12 @@
-### Basic Usage
+# OCR Auditor UI
 
-### TODO
+![alt text](public/logo_small.svg "OCR Auditor UI")
 
-Use [createContext](https://reactjs.org/docs/context.html) so that all children are able to access the context of the hOCR view -- see this [stackoverflow answer](https://stackoverflow.com/a/39401252/306818)
+A tool for audition of Optical Character Recognition output such as hOCR and Alto
 
+***Caution: work in progress***
 
-```
-const { Provider, Consumer } = React.createContext(view);
-```
+### Semver
 
-### Font Sources
-
-* [tex-gyre-math](https://ctan.org/tex-archive/fonts/tex-gyre-math/opentype) | License: [GFL](https://ctan.org/license/gfl)
-* [The TeX Gyre (TG) Collection of Fonts](http://www.gust.org.pl/projects/e-foundry/tex-gyre/) | License: [GFL](http://www.gust.org.pl/projects/e-foundry/licenses)
-
+Please note that versions below 1.0.0 might lack critical aspects in regards of documentation and
+implementation.
